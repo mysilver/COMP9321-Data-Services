@@ -20,7 +20,8 @@ def print_dataframe(df, print_colum=True, print_rows=True):
             print(",".join([str(row[column]) for column in df]))
 
 
-csv_file = '../datasets/Demographic_Statistics_By_Zip_Code.csv'
-dataframe = read_csv(csv_file)
-print_dataframe(dataframe)
-write_csv(dataframe, "../datasets/Demographic_Statistics.csv")
+if __name__ == '__main__':
+    csv_file = '../datasets/Demographic_Statistics_By_Zip_Code.csv'
+    dataframe = read_csv(csv_file)
+    print_dataframe(dataframe)
+    write_csv(dataframe, "../datasets/Demographic_Statistics.csv")
