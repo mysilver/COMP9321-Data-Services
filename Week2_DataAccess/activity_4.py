@@ -36,6 +36,7 @@ def json_to_dataframe(json_obj: dict) -> pd.DataFrame:
 
 
 if __name__ == '__main__':
+
     url = "https://data.cityofnewyork.us/api/views/kku6-nxdu/rows.json"
 
     print("Fetch the json")
