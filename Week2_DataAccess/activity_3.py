@@ -42,7 +42,7 @@ if __name__ == '__main__':
     """
 
     user = 'user'
-    password = 'comp9321'
+    password = 'password'
     db_name = 'comp9321'
     connection_url = 'mongodb://' + user + ':' + password + '@ds147461.mlab.com:47461/' + db_name
 
