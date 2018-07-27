@@ -1,17 +1,33 @@
 import json
 import pandas as pd
 from pymongo import MongoClient
-from Week2_DataAccess.activity_1 import read_csv, print_dataframe
 
+def read_csv(csv_file: str):
+    """
+    :param csv_file: the path of csv file
+    :return: A dataframe out of the csv file
+    """
+    return pd.read_csv(csv_file)
 
-def write_in_mongodb(dataframe, connection_url: str, db_name: str, collection: str) -> None:
+def print_dataframe(df, print_column=True, print_rows=True):
+    # print column names
+    if print_column:
+        print(",".join([column for column in df]))
+
+    # print rows one by one
+    if print_rows:
+        for index, row in df.iterrows():
+            print(",".join([str(row[column]) for column in df]))
+            
+def write_in_mongodb(dataframe, mongo_host: str, mongo_port: int, db_name: str, collection: str) -> None:
     """
     :param dataframe: 
-    :param connection_url: A connection string for the database 
+    :param mongo_host: Mongodb server address 
+    :param mongo_port: Mongodb server port number
     :param db_name: The name of the database
     :param collection: the name of the collection inside the database
     """
-    client = MongoClient(connection_url)
+    client = MongoClient(host=mongo_host, port=mongo_port)
     db = client[db_name]
     c = db[collection]
     # You can only store documents in mongodb;
@@ -20,14 +36,15 @@ def write_in_mongodb(dataframe, connection_url: str, db_name: str, collection: s
     c.insert(records)
 
 
-def read_from_mongodb(connection_url: str, db_name: str, collection: str):
+def read_from_mongodb(mongo_host: str, mongo_port: int, db_name: str, collection: str):
     """
-    :param connection_url: A connection string for the database 
+    :param mongo_host: Mongodb server address 
+    :param mongo_port: Mongodb server port number
     :param db_name: The name of the database
     :param collection: the name of the collection inside the database
     :return: A dataframe which contains all documents inside the collection
     """
-    client = MongoClient(connection_url)
+    client = MongoClient(host=mongo_host, port=mongo_port)
     db = client[db_name]
     c = db[collection]
     return pd.DataFrame(list(c.find()))
@@ -41,19 +58,18 @@ if __name__ == '__main__':
     # However, connecting to a local mongodb is a bit more straightforward than the following code!
     """
 
-    user = 'user'
-    password = 'password'
     db_name = 'comp9321'
-    connection_url = 'mongodb://' + user + ':' + password + '@ds147461.mlab.com:47461/' + db_name
+    mongo_port = 27017
+    mongo_host = 'localhost'
 
-    csv_file = '../datasets/Demographic_Statistics_By_Zip_Code.csv'
+    csv_file = 'Demographic_Statistics_By_Zip_Code.csv' # path to the downloaded csv file
     df = read_csv(csv_file)
     collection = 'Demographic_Statistics'
 
     print("Writing into the mongodb")
-    write_in_mongodb(df, connection_url, db_name, collection)
+    write_in_mongodb(df, mongo_host, mongo_port, db_name, collection)
 
     print("Querying the database")
-    df = read_from_mongodb(connection_url, db_name, collection)
+    df = read_from_mongodb(mongo_host, mongo_port, db_name, collection)
 
     print_dataframe(df)
