@@ -29,11 +29,11 @@ def print_dataframe(df, print_column=True, print_rows=True):
 
 
 if __name__ == '__main__':
-    csv_file = '../datasets/Demographic_Statistics_By_Zip_Code.csv'
+    csv_file = 'Demographic_Statistics_By_Zip_Code.csv' # path to the downloaded csv file
     dataframe = read_csv(csv_file)
 
     print("Loading the csv file")
     print_dataframe(dataframe)
 
     print("Write the dataframe as a csv file")
-    write_in_csv(dataframe, "../datasets/Demographic_Statistics.csv")
+    write_in_csv(dataframe, "Demographic_Statistics_New.csv") # path where the new csv file is stored
