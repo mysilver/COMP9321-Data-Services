@@ -1,7 +1,12 @@
 import sqlite3
 from pandas.io import sql
-from Week2_DataAccess.activity_1 import read_csv
 
+def read_csv(csv_file: str):
+    """
+    :param csv_file: the path of csv file
+    :return: A dataframe out of the csv file
+    """
+    return pd.read_csv(csv_file)
 
 def write_in_sqlite(dataframe, database_file: str, table_name: str) -> None:
     """
@@ -26,12 +31,12 @@ def read_from_sqlite(database_file: str, table_name: str):
 
 if __name__ == '__main__':
     table_name = "Demographic_Statistics"
-    database_file = '../datasets/Demographic_Statistics.db'
-    csv_file = '../datasets/Demographic_Statistics_By_Zip_Code.csv'
-    df = read_csv(csv_file)
+    database_file = 'Demographic_Statistics.db' # name of sqlite db file that will be created
+    csv_file = 'Demographic_Statistics_By_Zip_Code.csv' # path to the downloaded csv file
+    loaded_df = read_csv(csv_file)
 
     print("Creating database")
-    write_in_sqlite(csv_file, database_file, table_name)
+    write_in_sqlite(loaded_df, database_file, table_name)
 
     print("Querying the database")
-    df = read_from_sqlite(database_file, table_name)
+    queried_df = read_from_sqlite(database_file, table_name)
