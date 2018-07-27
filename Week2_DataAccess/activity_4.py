@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-from Week2_DataAccess.activity_1 import print_dataframe
 
 
 def get_json(url) -> dict:
@@ -35,6 +34,17 @@ def json_to_dataframe(json_obj: dict) -> pd.DataFrame:
     return pd.DataFrame(data=json_data, columns=columns)
 
 
+def print_dataframe(df, print_column=True, print_rows=True):
+    # print column names
+    if print_column:
+        print(",".join([column for column in df]))
+
+    # print rows one by one
+    if print_rows:
+        for index, row in df.iterrows():
+            print(",".join([str(row[column]) for column in df]))
+            
+            
 if __name__ == '__main__':
 
     url = "https://data.cityofnewyork.us/api/views/kku6-nxdu/rows.json"
