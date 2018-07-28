@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 
 
-def get_json(url) -> dict:
+def get_json(url):
     """
     :param url: RUL of the resouce
     :return: JSON
@@ -12,7 +12,7 @@ def get_json(url) -> dict:
     return data
 
 
-def json_to_dataframe(json_obj: dict) -> pd.DataFrame:
+def json_to_dataframe(json_obj):
     """
     Please Open the JSON using the given URL to be familiar with the 
     structure of the expected JSON object
@@ -34,15 +34,15 @@ def json_to_dataframe(json_obj: dict) -> pd.DataFrame:
     return pd.DataFrame(data=json_data, columns=columns)
 
 
-def print_dataframe(df, print_column=True, print_rows=True):
+def print_dataframe(dataframe, print_column=True, print_rows=True):
     # print column names
     if print_column:
-        print(",".join([column for column in df]))
+        print(",".join([column for column in dataframe]))
 
     # print rows one by one
     if print_rows:
-        for index, row in df.iterrows():
-            print(",".join([str(row[column]) for column in df]))
+        for index, row in dataframe.iterrows():
+            print(",".join([str(row[column]) for column in dataframe]))
             
             
 if __name__ == '__main__':
