@@ -54,12 +54,6 @@ def read_from_mongodb(mongo_host, mongo_port, db_name, collection):
 
 
 if __name__ == '__main__':
-    """
-    # the following information is needed when you use mLab.com instead of a local mongodb instance
-    # We highly encourage you to use mLab to be familiar with the concept of Database as a Service
-    # Moreover, in this case, you do not need to install mongodb on your own machine!
-    # However, connecting to a local mongodb is a bit more straightforward than the following code!
-    """
 
     db_name = 'comp9321'
     mongo_port = 27017
