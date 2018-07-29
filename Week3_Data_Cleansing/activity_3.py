@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # Because panda's query method does not work well with column names which contains white spaces
     df.columns = [c.replace(' ', '_') for c in df.columns]
 
-    # Filter the rows and only keep books which are published in "London" after 1866.
+    #
     df = df.query('Date_of_Publication > 1866 and Place_of_Publication == "London"')
 
     print_dataframe(df)
