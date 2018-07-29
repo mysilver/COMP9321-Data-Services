@@ -9,14 +9,15 @@ def clean(df):
     return df
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     csv_file = 'Books.csv'
     df = pd.read_csv(csv_file)
 
     # Cleaning is Optional; but it will increase the accuracy of the results
     df = clean(df)
 
+    # value_counts: returns a Series containing counts of each category.
     unival = df['Place of Publication'].value_counts()
-    unival.plot.pie()
+    unival.plot.pie(subplots=True)
 
     plt.show()

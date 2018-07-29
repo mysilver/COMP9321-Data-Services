@@ -1,23 +1,21 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     csv_file = 'iris.csv'
     df = pd.read_csv(csv_file)
 
-    # for type in np.unique(df['species'].values):
-    #     print type
-
+    # divide the dataset into three dataframes based on the species
     setosa_df = df.query('species == "setosa"')
     versicolor_df = df.query('species == "versicolor"')
     virginica_df = df.query('species == "virginica"')
 
+    # Plot a scatter chart using x='sepal_length', y='sepal_width', and separate colors for each of the three dataframes
     ax = setosa_df.plot.scatter(x='sepal_length', y='sepal_width', label='setosa')
     ax = versicolor_df.plot.scatter(x='sepal_length', y='sepal_width', label='versicolor', color='green', ax=ax)
     ax = virginica_df.plot.scatter(x='sepal_length', y='sepal_width', label='virginica', color='red', ax=ax)
 
+    # Plot a scatter chart using x='petal_length', y='petal_width', and separate colors for each of the three dataframes
     ax = setosa_df.plot.scatter(x='petal_length', y='petal_width', label='setosa')
     ax = versicolor_df.plot.scatter(x='petal_length', y='petal_width', label='versicolor', color='green', ax=ax)
     ax = virginica_df.plot.scatter(x='petal_length', y='petal_width', label='virginica', color='red', ax=ax)
