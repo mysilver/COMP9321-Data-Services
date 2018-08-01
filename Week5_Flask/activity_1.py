@@ -1,55 +1,28 @@
-from flask import Flask
-from flask import request
-from flask_restplus import Resource, Api
-import pandas as pd
 import json
-
-from flask_restplus import fields
+import pandas as pd
+from flask import Flask
+from flask_restplus import Resource, Api
 
 app = Flask(__name__)
 api = Api(app)
 
-# The following is the schema of Book
-book_model = api.model('Book', {
-    'Flickr_URL': fields.String,
-    'Publisher': fields.String,
-    'Author': fields.String,
-    'Title': fields.String,
-    'Date_of_Publication': fields.Integer,
-    'Identifier': fields.Integer,
-    'Place_of_Publication': fields.String
-})
-
 
 @api.route('/books/<int:id>')
-@api.expect(fields=book_model, validate=True)
-@api.param('id', 'The Book identifier')
 class Books(Resource):
-    """
-    Booked published in somewhere
-    """
-
-    @api.response(404, 'Book was not found')
-    @api.response(200, 'Successful')
-    @api.marshal_with(book_model)
-    @api.doc(description="Get a book by its ID", summary="hello")
+    # @api.marshal_with(book_model)
     def get(self, id):
-        # return json.loads(df.to_json(orient='records'))
-        ret = json.loads(df.query("Identifier==" + str(id)).to_json(orient='records'))
+        filtered_df = df.query("Identifier==" + str(id))
+        books = filtered_df.to_json(orient='records')
+        ret = json.loads(books)
+
         if ret:
+            # Book has been found
+            book = ret[0]
+            book['Identifier'] = id
             return ret[0]
 
+        # There is no such a book
         api.abort(404, "Book {} doesn't exist".format(id))
-
-    @api.response(404, 'Book was not found')
-    @api.response(200, 'Successful')
-    def delete(self, id):
-        try:
-            df.drop(id, inplace=True)
-        except ValueError:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
-        return {"message": "Book removed"}, 200
 
 
 if __name__ == '__main__':
@@ -77,6 +50,8 @@ if __name__ == '__main__':
     # replace spaces in the name of columns
     df.columns = [c.replace(' ', '_') for c in df.columns]
 
+    # set the index column; this will help us to find books with their ids
     df.set_index('Identifier', inplace=True)
 
+    # run the application
     app.run(debug=True)

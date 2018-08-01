@@ -14,14 +14,15 @@ api = Api(app,
 
 # The following is the schema of Book
 book_model = api.model('Book', {
-    'Flickr_URL': fields.String,
-    'Publisher': fields.String,
-    'Author': fields.String,
-    'Title': fields.String,
-    'Date_of_Publication': fields.Integer,
     'Identifier': fields.Integer,
-    'Place_of_Publication': fields.String
+    'Title': fields.String,
+    'Author': fields.String,
+    'Date_of_Publication': fields.Integer,
+    'Place_of_Publication': fields.String,
+    'Publisher': fields.String,
+    'Flickr_URL': fields.String,
 })
+
 
 
 @api.route('/books/')
