@@ -7,7 +7,10 @@ import json
 from flask_restplus import fields
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app,
+          default="Books",  # Default namespace
+          title="Book Dataset",  # Documentation Title
+          description="This is just a simple example to show how publish data as a service.")  # Documentation Description
 
 # The following is the schema of Book
 book_model = api.model('Book', {
@@ -19,6 +22,22 @@ book_model = api.model('Book', {
     'Identifier': fields.Integer,
     'Place_of_Publication': fields.String
 })
+
+
+@api.route('/books/')
+@api.expect(fields=book_model, validate=True)
+class BooksList(Resource):
+    """
+    Booked published in somewhere
+    """
+
+    @api.response(200, 'Success')
+    @api.response(400, 'Validation Error')
+    @api.marshal_with(book_model)
+    @api.expect(book_model)
+    def post(self):
+        book = request.json
+        return book, 201
 
 
 @api.route('/books/<int:id>')
@@ -64,17 +83,12 @@ if __name__ == '__main__':
                        ]
     csv_file = "Books.csv"
     df = pd.read_csv(csv_file)
-
-    # drop unnecessary columns
     df.drop(columns_to_drop, inplace=True, axis=1)
 
-    # clean the date of publication & convert it to numeric data
     new_date = df['Date of Publication'].str.extract(r'^(\d{4})', expand=False)
     new_date = pd.to_numeric(new_date)
     new_date = new_date.fillna(0)
     df['Date of Publication'] = new_date
-
-    # replace spaces in the name of columns
     df.columns = [c.replace(' ', '_') for c in df.columns]
 
     df.set_index('Identifier', inplace=True)
