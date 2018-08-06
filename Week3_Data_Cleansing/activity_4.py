@@ -34,6 +34,14 @@ if __name__ == "__main__":
 
     city_df = pd.read_csv('City.csv')
 
+    # merge the two dataframes
     df = pd.merge(books_df, city_df, how='left', left_on=['Place_of_Publication'], right_on=['City'])
-    df = df.groupby(['Country'], as_index=False)['City'].count()
+
+    # Group by Country and keep the country as a column
+    gb_df = df.groupby(['Country'], as_index=False)
+
+    # Select a column (as far as it has values for all rows, you can select any column)
+    df = gb_df['Identifier'].count()
+
+    # print the dataframe which shows publication number by country
     print_dataframe(df)
