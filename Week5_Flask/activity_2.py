@@ -1,8 +1,5 @@
-import json
-
 import pandas as pd
 from flask import Flask
-from flask import request
 from flask_restplus import Resource, Api
 from flask_restplus import fields
 

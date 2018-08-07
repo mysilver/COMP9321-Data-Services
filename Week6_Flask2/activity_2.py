@@ -47,6 +47,29 @@ class BooksList(Resource):
         ret = json.loads(json_str)
         return ret
 
+    @api.expect(book_model)
+    def post(self):
+        book = request.json
+
+        if 'Identifier' not in book:
+            return {"message": "Missing Identifier"}, 400
+
+        id = book['Identifier']
+
+        # check if the given identifier does not exist
+        if id in df.index:
+            return {"message": "A book with Identifier={} is already in the dataset".format(id)}, 400
+
+        # Put the values into the dataframe
+        for key in book:
+            if key not in book_model.keys():
+                # unexpected column
+                return {"message": "Property {} is invalid".format(key)}, 400
+            df.loc[id, key] = book[key]
+
+        df.append(book, ignore_index=True)
+        return {"message": "Book {} is created".format(id)}, 201
+
 
 @api.route('/books/<int:id>')
 class Books(Resource):

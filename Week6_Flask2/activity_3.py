@@ -9,7 +9,10 @@ from flask_restplus import inputs
 from flask_restplus import reqparse
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app,
+          default="Books",  # Default namespace
+          title="Book Dataset",  # Documentation Title
+          description="This is just a simple example to show how publish data as a service.")  # Documentation Description
 
 # The following is the schema of Book
 book_model = api.model('Book', {
@@ -30,6 +33,8 @@ parser.add_argument('ascending', type=inputs.boolean)
 @api.route('/books')
 class BooksList(Resource):
     @api.expect(parser, validate=True)
+    @api.response(200, 'Successful')
+    @api.doc(description="Get all books")
     def get(self):
         # get books as JSON string
         args = parser.parse_args()
@@ -47,9 +52,39 @@ class BooksList(Resource):
         ret = json.loads(json_str)
         return ret
 
+    @api.expect(book_model)
+    @api.response(201, 'Book Created Successfully')
+    @api.response(400, 'Validation Error')
+    @api.doc(description="Add a new book")
+    def post(self):
+        book = request.json
+
+        if 'Identifier' not in book:
+            return {"message": "Missing Identifier"}, 400
+
+        id = book['Identifier']
+
+        # check if the given identifier does not exist
+        if id in df.index:
+            return {"message": "A book with Identifier={} is already in the dataset".format(id)}, 400
+
+        # Put the values into the dataframe
+        for key in book:
+            if key not in book_model.keys():
+                # unexpected column
+                return {"message": "Property {} is invalid".format(key)}, 400
+            df.loc[id, key] = book[key]
+
+        df.append(book, ignore_index=True)
+        return {"message": "Book {} is created".format(id)}, 201
+
 
 @api.route('/books/<int:id>')
+@api.param('id', 'The Book identifier')
 class Books(Resource):
+    @api.response(404, 'Book was not found')
+    @api.response(200, 'Successful')
+    @api.doc(description="Get a book by its ID")
     def get(self, id):
         if id not in df.index:
             api.abort(404, "Book {} doesn't exist".format(id))
@@ -57,6 +92,9 @@ class Books(Resource):
         book = dict(df.loc[id])
         return book
 
+    @api.response(404, 'Book was not found')
+    @api.response(200, 'Successful')
+    @api.doc(description="Delete a book by its ID")
     def delete(self, id):
         if id not in df.index:
             api.abort(404, "Book {} doesn't exist".format(id))
@@ -64,7 +102,11 @@ class Books(Resource):
         df.drop(id, inplace=True)
         return {"message": "Book {} is removed.".format(id)}, 200
 
+    @api.response(404, 'Book was not found')
+    @api.response(400, 'Validation Error')
+    @api.response(200, 'Successful')
     @api.expect(book_model)
+    @api.doc(description="Update a book by its ID")
     def put(self, id):
 
         if id not in df.index:
