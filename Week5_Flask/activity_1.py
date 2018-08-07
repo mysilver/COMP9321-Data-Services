@@ -1,4 +1,3 @@
-import json
 import pandas as pd
 from flask import Flask
 from flask_restplus import Resource, Api
@@ -9,20 +8,12 @@ api = Api(app)
 
 @api.route('/books/<int:id>')
 class Books(Resource):
-    # @api.marshal_with(book_model)
     def get(self, id):
-        filtered_df = df.query("Identifier==" + str(id))
-        books = filtered_df.to_json(orient='records')
-        ret = json.loads(books)
+        if id not in df.index:
+            api.abort(404, "Book {} doesn't exist".format(id))
 
-        if ret:
-            # Book has been found
-            book = ret[0]
-            book['Identifier'] = id
-            return ret[0]
-
-        # There is no such a book
-        api.abort(404, "Book {} doesn't exist".format(id))
+        book = dict(df.loc[id])
+        return book
 
 
 if __name__ == '__main__':

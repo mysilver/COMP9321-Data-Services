@@ -5,6 +5,8 @@ from flask import Flask
 from flask import request
 from flask_restplus import Resource, Api
 from flask_restplus import fields
+from flask_restplus import inputs
+from flask_restplus import reqparse
 
 app = Flask(__name__)
 api = Api(app)
@@ -20,31 +22,63 @@ book_model = api.model('Book', {
     'Place_of_Publication': fields.String
 })
 
+parser = reqparse.RequestParser()
+parser.add_argument('order', choices=list(column for column in book_model.keys()))
+parser.add_argument('ascending', type=inputs.boolean)
+
+
+@api.route('/books')
+class BooksList(Resource):
+    @api.expect(parser, validate=True)
+    def get(self):
+        # get books as JSON string
+        args = parser.parse_args()
+
+        # retrieve the query parameters
+        order_by = args.get('order')
+        ascending = args.get('ascending', True)
+
+        if order_by:
+            df.sort_values(by=order_by, inplace=True, ascending=ascending)
+
+        json_str = df.to_json(orient='records')
+
+        # convert the string JSON to a real JSON
+        ret = json.loads(json_str)
+
+        return ret
+
 
 @api.route('/books/<int:id>')
 class Books(Resource):
     def get(self, id):
-        if id not in df.index:
+        try:
+            book = dict(df.loc[id])
+            return book
+        except KeyError:
             api.abort(404, "Book {} doesn't exist".format(id))
 
-        book = dict(df.loc[id])
-        return book
 
     def delete(self, id):
-        if id not in df.index:
+        try:
+            df.drop(id, inplace=True)
+        except ValueError:
+            # There is no book with the given ID
             api.abort(404, "Book {} doesn't exist".format(id))
 
-        df.drop(id, inplace=True)
         return {"message": "Book {} is removed.".format(id)}, 200
 
     @api.expect(book_model)
     def put(self, id):
-
-        if id not in df.index:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
         # get the payload and convert it to a JSON
         book = request.json
+
+        # find the book by its id
+        filtered_df = df.query("Identifier==" + str(id))
+
+        # check if the book exists
+        if len(filtered_df.index) == 0:
+            return {"message": "Book with Identifier={} does not exist".format(id)}, 400
 
         # Book ID cannot be changed
         if 'Identifier' in book and id != book['Identifier']:
