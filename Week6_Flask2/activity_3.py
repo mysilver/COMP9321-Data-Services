@@ -46,10 +46,17 @@ class BooksList(Resource):
         if order_by:
             df.sort_values(by=order_by, inplace=True, ascending=ascending)
 
-        json_str = df.to_json(orient='records')
+        json_str = df.to_json(orient='index')
 
         # convert the string JSON to a real JSON
-        ret = json.loads(json_str)
+        ds = json.loads(json_str)
+        ret = []
+
+        for idx in ds:
+            book = ds[idx]
+            book['Identifier'] = idx
+            ret.append(book)
+
         return ret
 
     @api.expect(book_model)
