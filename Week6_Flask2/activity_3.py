@@ -54,7 +54,7 @@ class BooksList(Resource):
 
         for idx in ds:
             book = ds[idx]
-            book['Identifier'] = idx
+            book['Identifier'] = int(idx)
             ret.append(book)
 
         return ret
