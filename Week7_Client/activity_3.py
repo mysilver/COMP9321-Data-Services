@@ -18,8 +18,11 @@ def get_book(id):
     r = requests.get("http://127.0.0.1:5000/books/" + str(id))
     book = r.json()
     print("Get status Code:" + str(r.status_code))
-    print_book(book)
-    return book
+    if r.ok:
+        print_book(book)
+        return book
+    else:
+        print('Error:' + book['message'])
 
 
 if __name__ == '__main__':
