@@ -1,21 +1,9 @@
 import pandas as pd
 from flask import Flask
 from flask_restplus import Resource, Api
-from flask_restplus import fields
 
 app = Flask(__name__)
 api = Api(app)
-
-# The following is the schema of Book
-book_model = api.model('Book', {
-    'Flickr_URL': fields.String,
-    'Publisher': fields.String,
-    'Author': fields.String,
-    'Title': fields.String,
-    'Date_of_Publication': fields.Integer,
-    'Identifier': fields.Integer,
-    'Place_of_Publication': fields.String
-})
 
 
 @api.route('/books/<int:id>')
