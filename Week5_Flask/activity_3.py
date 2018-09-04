@@ -55,7 +55,7 @@ class Books(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
             df.loc[id, key] = book[key]
 
-        df.append(book, ignore_index=True)
+        # df.append(book, ignore_index=True)
         return {"message": "Book {} has been successfully updated".format(id)}, 200
 
 
