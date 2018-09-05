@@ -29,7 +29,7 @@ parser.add_argument('ascending', type=inputs.boolean)
 
 @api.route('/books')
 class BooksList(Resource):
-    @api.expect(parser, validate=True)
+
     def get(self):
         # get books as JSON string
         args = parser.parse_args()
@@ -54,7 +54,7 @@ class BooksList(Resource):
 
         return ret
 
-    @api.expect(book_model)
+    @api.expect(book_model, validate=True)
     def post(self):
         book = request.json
 

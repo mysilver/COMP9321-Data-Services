@@ -32,7 +32,7 @@ parser.add_argument('ascending', type=inputs.boolean)
 
 @api.route('/books')
 class BooksList(Resource):
-    @api.expect(parser, validate=True)
+
     @api.response(200, 'Successful')
     @api.doc(description="Get all books")
     def get(self):
@@ -59,10 +59,10 @@ class BooksList(Resource):
 
         return ret
 
-    @api.expect(book_model)
     @api.response(201, 'Book Created Successfully')
     @api.response(400, 'Validation Error')
     @api.doc(description="Add a new book")
+    @api.expect(book_model, validate=True)
     def post(self):
         book = request.json
 
@@ -112,7 +112,7 @@ class Books(Resource):
     @api.response(404, 'Book was not found')
     @api.response(400, 'Validation Error')
     @api.response(200, 'Successful')
-    @api.expect(book_model)
+    @api.expect(book_model, validate=True)
     @api.doc(description="Update a book by its ID")
     def put(self, id):
 
