@@ -82,7 +82,7 @@ class BooksList(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
             df.loc[id, key] = book[key]
 
-        df.append(book, ignore_index=True)
+        # df.append(book, ignore_index=True)
         return {"message": "Book {} is created".format(id)}, 201
 
 
