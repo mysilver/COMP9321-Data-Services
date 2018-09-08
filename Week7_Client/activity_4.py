@@ -5,7 +5,7 @@ def print_book(book):
     print("Book {")
     for key in book.keys():
         attr = str(key)
-        if isinstance(book[key], unicode):
+        if isinstance(book[key], str):
             val = str(book[key].encode('utf-8'))
         else:
             val = str(book[key])
@@ -26,8 +26,9 @@ def get_book(id):
 
 
 def remove_book(id):
-    pass
-
+    r = requests.delete("http://127.0.0.1:5000/books/206")
+    print("Delete status Code:" + str(r.status_code))
+    print(r.json()['message'])
 
 if __name__ == '__main__':
 
@@ -36,9 +37,7 @@ if __name__ == '__main__':
 
     # update the book information
     print("***** Deleting Book *****")
-    r = requests.delete("http://127.0.0.1:5000/books/206")
-    print("Delete status Code:" + str(r.status_code))
-    print(r.json()['message'])
+    remove_book(206)
 
     print("***** Book information after Delete *****")
     book = get_book(206)
