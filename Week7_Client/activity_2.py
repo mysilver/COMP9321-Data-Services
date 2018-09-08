@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     r = requests.post("http://127.0.0.1:5000/books", json=book)
 
-    print "Status Code:" + str(r.status_code)
+    print("Status Code:" + str(r.status_code))
     resp = r.json()
 
     print(resp['message'])
