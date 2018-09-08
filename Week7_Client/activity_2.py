@@ -6,7 +6,7 @@ if __name__ == '__main__':
         "Publisher": "UNSW",
         "Author": "Nobody",
         "Title": "Nothing",
-        "Flickr_URL": None,
+        "Flickr_URL": "http://somewhere",
         "Identifier": 2,
         "Place_of_Publication": "Sydney"
     }

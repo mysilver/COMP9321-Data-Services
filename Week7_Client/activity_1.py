@@ -5,10 +5,10 @@ def print_book(book):
     print("Book {")
     for key in book.keys():
         attr = str(key)
-        if isinstance(book[key], str):
-            val = str(book[key].encode('utf-8'))
-        else:
-            val = str(book[key])
+        # if isinstance(book[key], str):
+        #     val = str(book[key].encode('utf-8'))
+        # else:
+        val = str(book[key])
 
         print("\t" + attr + ":" + val)
     print("}")
