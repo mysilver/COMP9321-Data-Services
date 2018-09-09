@@ -22,7 +22,7 @@ def get_book(id):
 
 
 def remove_book(id):
-    r = requests.delete("http://127.0.0.1:5000/books/206")
+    r = requests.delete("http://127.0.0.1:5000/books/"+id)
     print("Delete status Code:" + str(r.status_code))
     print(r.json()['message'])
 
