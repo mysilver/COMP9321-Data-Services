@@ -16,10 +16,10 @@ class AuthenticationToken:
         }
 
         token = self.serializer.dumps(info)
-        return token
+        return token.decode()
 
     def validate_token(self, token):
-        info = self.serializer.loads(token)
+        info = self.serializer.loads(token.encode())
 
         if time() - info['creation_time'] > self.expires_in:
             raise SignatureExpired("The Token has been expired; get a new token")
