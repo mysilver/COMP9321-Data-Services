@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.utils import shuffle
-from sklearn.metrics import precision_score, accuracy_score, recall_score, precision_recall_curve
+from sklearn.metrics import precision_score, accuracy_score, recall_score
 
 
 def load_iris(iris_path, split_percentage):
