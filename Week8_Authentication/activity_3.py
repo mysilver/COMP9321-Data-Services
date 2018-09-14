@@ -1,41 +1,39 @@
 import json
 from functools import wraps
+from time import time
+
 import pandas as pd
 from flask import Flask
 from flask import request
-from flask_restplus import Resource, Api
-from flask_restplus import abort
+from flask_restplus import Resource, Api, abort
 from flask_restplus import fields
 from flask_restplus import inputs
 from flask_restplus import reqparse
-from itsdangerous import TimestampSigner, SignatureExpired
-
-
-def authenticate(username, password):
-    if not (username == 'admin' and password == 'admin'):
-        return True
-    return False
+from itsdangerous import SignatureExpired, JSONWebSignatureSerializer, BadSignature
 
 
 class AuthenticationToken:
     def __init__(self, secret_key, expires_in):
         self.secret_key = secret_key
         self.expires_in = expires_in
-        self.serializer = TimestampSigner(secret_key)
+        self.serializer = JSONWebSignatureSerializer(secret_key)
 
     def generate_token(self, username):
+        info = {
+            'username': username,
+            'creation_time': time()
+        }
 
-        info = {'username': username}
-        token = self.serializer.sign(json.dumps(info))
+        token = self.serializer.dumps(info)
         return token.decode()
 
     def validate_token(self, token):
-        try:
-            info = self.serializer.unsign(token.encode(), max_age=expires_in)
-            info = json.loads(info)
-            return info['username']
-        except SignatureExpired:
-            return None
+        info = self.serializer.loads(token.encode())
+
+        if time() - info['creation_time'] > self.expires_in:
+            raise SignatureExpired("The Token has been expired; get a new token")
+
+        return info['username']
 
 
 SECRET_KEY = "A SECRET KEY; USUALLY A VERY LONG RANDOM STRING"
@@ -43,7 +41,14 @@ expires_in = 600
 auth = AuthenticationToken(SECRET_KEY, expires_in)
 
 app = Flask(__name__)
-api = Api(app,
+api = Api(app, authorizations={
+                'API-KEY': {
+                    'type': 'apiKey',
+                    'in': 'header',
+                    'name': 'AUTH-TOKEN'
+                }
+            },
+          security='API-KEY',
           default="Books",  # Default namespace
           title="Book Dataset",  # Documentation Title
           description="This is just a simple example to show how publish data as a service.")  # Documentation Description
@@ -52,6 +57,18 @@ api = Api(app,
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+
+        token = request.headers.get('AUTH-TOKEN')
+        if not token:
+            abort(401, 'Authentication token is missing')
+
+        try:
+            user = auth.validate_token(token)
+        except SignatureExpired as e:
+            abort(401, e.message)
+        except BadSignature as e:
+            abort(401, e.message)
+
         return f(*args, **kwargs)
 
     return decorated
@@ -68,14 +85,14 @@ book_model = api.model('Book', {
     'Place_of_Publication': fields.String
 })
 
+parser = reqparse.RequestParser()
+parser.add_argument('order', choices=list(column for column in book_model.keys()))
+parser.add_argument('ascending', type=inputs.boolean)
+
 credential_model = api.model('credential', {
     'username': fields.String,
     'password': fields.String
 })
-
-parser = reqparse.RequestParser()
-parser.add_argument('order', choices=list(column for column in book_model.keys()))
-parser.add_argument('ascending', type=inputs.boolean)
 
 credential_parser = reqparse.RequestParser()
 credential_parser.add_argument('username', type=str)
@@ -93,7 +110,7 @@ class Token(Resource):
         username = args.get('username')
         password = args.get('password')
 
-        if (authenticate(username, password)):
+        if username == 'admin' and password == 'admin':
             return {"token": auth.generate_token(username)}
 
         return {"message": "authorization has been refused for those credentials."}, 401
