@@ -41,6 +41,16 @@ def question_8():
     pass
 
 
+def question_9():
+    print("--------------- question_8 ---------------")
+    pass
+
+
+def question_10():
+    print("--------------- question_8 ---------------")
+    pass
+
+
 if __name__ == "__main__":
     question_1()
     question_2()
@@ -50,3 +60,5 @@ if __name__ == "__main__":
     question_6()
     question_7()
     question_8()
+    question_9()
+    question_10()
