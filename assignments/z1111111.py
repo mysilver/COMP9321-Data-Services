@@ -42,12 +42,12 @@ def question_8():
 
 
 def question_9():
-    print("--------------- question_8 ---------------")
+    print("--------------- question_9 ---------------")
     pass
 
 
 def question_10():
-    print("--------------- question_8 ---------------")
+    print("--------------- question_10 ---------------")
     pass
 
 
