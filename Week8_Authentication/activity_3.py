@@ -10,14 +10,12 @@ from flask_restplus import Resource, Api, abort
 from flask_restplus import fields
 from flask_restplus import inputs
 from flask_restplus import reqparse
-from itsdangerous import SignatureExpired, JSONWebSignatureSerializer, BadSignature
 
 
 class AuthenticationToken:
     def __init__(self, secret_key, expires_in):
         self.secret_key = secret_key
         self.expires_in = expires_in
-        self.serializer = JSONWebSignatureSerializer(secret_key)
 
     def generate_token(self, username):
         info = {
@@ -59,10 +57,8 @@ def requires_auth(f):
 
         try:
             user = auth.validate_token(token)
-        except SignatureExpired as e:
-            abort(401, e.message)
-        except BadSignature as e:
-            abort(401, e.message)
+        except Exception as e:
+            abort(401, e)
 
         return f(*args, **kwargs)
 
