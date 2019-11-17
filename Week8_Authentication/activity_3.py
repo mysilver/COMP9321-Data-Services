@@ -22,7 +22,7 @@ class AuthenticationToken:
     def generate_token(self, username):
         info = {
             'username': username,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=self.expires_in)
         }
         return jwt.encode(info, self.secret_key, algorithm='HS256')
 
