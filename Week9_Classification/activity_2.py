@@ -28,7 +28,7 @@ if __name__ == '__main__':
     csv_file = 'iris.csv'
 
     # Split the data into test and train parts
-    iris_X_train, iris_y_train, iris_X_test, iris_y_test = load_iris(csv_file, split_percentage=0.8)
+    iris_X_train, iris_y_train, iris_X_test, iris_y_test = load_iris(csv_file, split_percentage=0.7)
 
     # train a classifier
     knn = KNeighborsClassifier()
@@ -37,8 +37,7 @@ if __name__ == '__main__':
     # predict the test set
     predictions = knn.predict(iris_X_test)
 
-    print(confusion_matrix(iris_y_test, predictions))
-    print(precision_score(iris_y_test, predictions, average=None))
-    print(recall_score(iris_y_test, predictions, average=None))
-    print(accuracy_score(iris_y_test, predictions))
-
+    print("confusion_matrix:\n", confusion_matrix(iris_y_test, predictions))
+    print("precision:\t", precision_score(iris_y_test, predictions, average=None))
+    print("recall:\t\t", recall_score(iris_y_test, predictions, average=None))
+    print("accuracy:\t", accuracy_score(iris_y_test, predictions))

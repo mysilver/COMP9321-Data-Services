@@ -26,7 +26,7 @@ if __name__ == '__main__':
     csv_file = 'iris.csv'
 
     # Split the data into test and train parts
-    iris_X_train, iris_y_train, iris_X_test, iris_y_test = load_iris(csv_file, split_percentage=0.8)
+    iris_X_train, iris_y_train, iris_X_test, iris_y_test = load_iris(csv_file, split_percentage=0.7)
 
     # train a classifier
     knn = KNeighborsClassifier()
