@@ -1,7 +1,8 @@
+import datetime
 import json
 from functools import wraps
-from time import time
 
+import jwt
 import pandas as pd
 from flask import Flask
 from flask import request
@@ -21,18 +22,12 @@ class AuthenticationToken:
     def generate_token(self, username):
         info = {
             'username': username,
-            'creation_time': time()
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=30)
         }
-
-        token = self.serializer.dumps(info)
-        return token.decode()
+        return jwt.encode(info, self.secret_key, algorithm='HS256')
 
     def validate_token(self, token):
-        info = self.serializer.loads(token.encode())
-
-        if time() - info['creation_time'] > self.expires_in:
-            raise SignatureExpired("The Token has been expired; get a new token")
-
+        info = jwt.decode(token, self.secret_key, algorithms=['HS256'])
         return info['username']
 
 
@@ -42,12 +37,12 @@ auth = AuthenticationToken(SECRET_KEY, expires_in)
 
 app = Flask(__name__)
 api = Api(app, authorizations={
-                'API-KEY': {
-                    'type': 'apiKey',
-                    'in': 'header',
-                    'name': 'AUTH-TOKEN'
-                }
-            },
+    'API-KEY': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'AUTH-TOKEN'
+    }
+},
           security='API-KEY',
           default="Books",  # Default namespace
           title="Book Dataset",  # Documentation Title
