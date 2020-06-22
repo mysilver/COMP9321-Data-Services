@@ -1,5 +1,8 @@
 pipeline {
-    agent any 
+    agent any
+    triggers {
+        pollSCM('') //Empty quotes tells it to build on a push
+    }
     stages {
         stage('Build') {
             steps {
