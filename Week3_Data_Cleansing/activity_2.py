@@ -24,6 +24,7 @@ if __name__ == "__main__":
     new_date = df['Date of Publication'].str.extract(r'^(\d{4})', expand=False)
     # ^(\d{4}) : matches 4 digit numbers in the beginning of the string
     new_date = pd.to_numeric(new_date)
+    df['Date of Publication'] = new_date
     print(df['Date of Publication'])
 
     # replace all NaN with 0
