@@ -107,8 +107,8 @@ def question_5(df2):
 def question_6(df2):
     """
     :param df2: the dataframe created in question 2
-    :return: df6
-            Data Type: Dataframe
+    :return: lst
+            Data Type: list
             Please read the assignment specs to know how to create the output dataframe
     """
     cities_lst = []
@@ -117,7 +117,7 @@ def question_6(df2):
     #################################################
 
     log("QUESTION 6", output_df=None, other=cities_lst)
-    return df6
+    return lst
 
 
 def question_7(df2):
