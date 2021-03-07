@@ -92,8 +92,8 @@ def question_4(df2, continents):
 def question_5(df2):
     """
     :param df2: the dataframe created in question 2
-    :return: cities_lst
-            Data Type: list
+    :return: df5
+            Data Type: dataframe
             Please read the assignment specs to know how to create the output dataframe
     """
     #################################################
@@ -107,7 +107,7 @@ def question_5(df2):
 def question_6(df2):
     """
     :param df2: the dataframe created in question 2
-    :return: lst
+    :return: cities_lst
             Data Type: list
             Please read the assignment specs to know how to create the output dataframe
     """
