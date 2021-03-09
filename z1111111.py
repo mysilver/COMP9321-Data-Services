@@ -5,6 +5,7 @@ import sys
 import os
 import numpy as np
 import math
+import re
 
 studentid = os.path.basename(sys.modules[__name__].__file__)
 
