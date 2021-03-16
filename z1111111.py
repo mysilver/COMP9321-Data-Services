@@ -118,7 +118,7 @@ def question_6(df2):
     #################################################
 
     log("QUESTION 6", output_df=None, other=cities_lst)
-    return lst
+    return cities_lst
 
 
 def question_7(df2):
