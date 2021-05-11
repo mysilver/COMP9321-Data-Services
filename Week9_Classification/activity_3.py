@@ -31,7 +31,7 @@ def load_iris(iris_path, split_percentage):
 if __name__ == '__main__':
 
     csv_file = 'iris.csv'
-    iris_X, iris_y, _, _ = load_iris(csv_file, split_percentage=1)
+    iris_X, iris_y, _, _ = load_iris(csv_file, split_percentage=0.7)
 
     classifiers = [KNeighborsClassifier(),
                    DecisionTreeClassifier(),

@@ -6,10 +6,10 @@ import jwt
 import pandas as pd
 from flask import Flask
 from flask import request
-from flask_restplus import Resource, Api, abort
-from flask_restplus import fields
-from flask_restplus import inputs
-from flask_restplus import reqparse
+from flask_restx import Resource, Api, abort
+from flask_restx import fields
+from flask_restx import inputs
+from flask_restx import reqparse
 
 
 class AuthenticationToken:

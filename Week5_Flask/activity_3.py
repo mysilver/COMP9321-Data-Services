@@ -1,8 +1,8 @@
 import pandas as pd
 from flask import Flask
 from flask import request
-from flask_restplus import Resource, Api
-from flask_restplus import fields
+from flask_restx import Resource, Api
+from flask_restx import fields
 
 app = Flask(__name__)
 api = Api(app)

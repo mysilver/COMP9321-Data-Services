@@ -5,6 +5,7 @@ import sys
 import os
 import numpy as np
 import math
+import re
 
 studentid = os.path.basename(sys.modules[__name__].__file__)
 
@@ -92,8 +93,8 @@ def question_4(df2, continents):
 def question_5(df2):
     """
     :param df2: the dataframe created in question 2
-    :return: cities_lst
-            Data Type: list
+    :return: df5
+            Data Type: dataframe
             Please read the assignment specs to know how to create the output dataframe
     """
     #################################################
@@ -107,8 +108,8 @@ def question_5(df2):
 def question_6(df2):
     """
     :param df2: the dataframe created in question 2
-    :return: df6
-            Data Type: Dataframe
+    :return: cities_lst
+            Data Type: list
             Please read the assignment specs to know how to create the output dataframe
     """
     cities_lst = []
@@ -117,7 +118,7 @@ def question_6(df2):
     #################################################
 
     log("QUESTION 6", output_df=None, other=cities_lst)
-    return df6
+    return cities_lst
 
 
 def question_7(df2):
