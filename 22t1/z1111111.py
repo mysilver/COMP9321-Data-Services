@@ -43,19 +43,16 @@ def question_1(routes):
 def question_2(df1):
     """
     :param df1: the dataframe created in question 1
-    :return: list
-            Data Type: List of String
+    :return: dataframe df2
             Please read the assignment specs to know how to create the output dataframe
     """
 
-    hub_list = list()
     #################################################
     # Your code goes here ...
-
     #################################################
 
-    log("QUESTION 2", output_df=None, other=hub_list)
-    return hub_list
+    log("QUESTION 2", output_df=df2, other=df2.shape)
+    return df2
 
 
 def question_3(df1):
