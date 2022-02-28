@@ -43,3 +43,5 @@ if __name__ == '__main__':
 
     print("Querying the database")
     queried_df = read_from_sqlite(database_file, table_name)
+
+    print(queried_df.to_string())

@@ -39,6 +39,7 @@ def write_in_mongodb(dataframe, mongo_host, mongo_port, db_name, collection):
     c.insert(records)
 
 
+
 def read_from_mongodb(mongo_host, mongo_port, db_name, collection):
     """
     :param mongo_host: Mongodb server address 
@@ -51,7 +52,6 @@ def read_from_mongodb(mongo_host, mongo_port, db_name, collection):
     db = client[db_name]
     c = db[collection]
     return pd.DataFrame(list(c.find()))
-
 
 if __name__ == '__main__':
 
