@@ -57,7 +57,7 @@ def question_2(df1):
 
 def question_3(df1):
     """
-    :param df2: the dataframe created in question 1
+    :param df1: the dataframe created in question 1
     :return: df3
             Data Type: Dataframe
             Please read the assignment specs to know how to create the output dataframe
@@ -87,9 +87,9 @@ def question_4(df3):
     return df4
 
 
-def question_5(df2, suburbs):
+def question_5(df3, suburbs):
     """
-    :param df2: the dataframe created in question 2
+    :param df3: the dataframe created in question 2
     :param suburbs : the path to dataset
     :return: df5
             Data Type: dataframe
@@ -103,24 +103,25 @@ def question_5(df2, suburbs):
     return df5
 
 
-def question_6(suburbs):
+def question_6(df3):
     """
-    :param suburbs : the path to dataset
+    :param df3: the dataframe created in question 3
     :return: nothing, but saves the figure on the disk
     """
-
+    table = None
     #################################################
     # Your code goes here ...
     #################################################
 
-    plt.savefig("{}-Q6.png".format(studentid))
+    log("QUESTION 6", output_df=None, other=table)
+    return table
 
 
 
 
-def question_7(df1,suburbs):
+def question_7(df3,suburbs):
     """
-    :param df1: the dataframe created in question 1
+    :param df3: the dataframe created in question 3
     :param suburbs : the path to dataset
     :return: nothing, but saves the figure on the disk
     """
@@ -132,9 +133,9 @@ def question_7(df1,suburbs):
     plt.savefig("{}-Q7.png".format(studentid))
 
 
-def question_8(df1):
+def question_8(df3):
     """
-    :param df1: the dataframe created in question 1
+    :param df3: the dataframe created in question 3
     :param suburbs : the path to dataset
     :return: nothing, but saves the figure on the disk
     """
@@ -149,10 +150,10 @@ def question_8(df1):
 
 if __name__ == "__main__":
     df1 = question_1("routes.csv")
-    hub_list = question_2(df1.copy(True))
+    df2 = question_2(df1.copy(True))
     df3 = question_3(df1.copy(True))
-    df4 = question_4(df1.copy(True))
-    df5 = question_5(df1.copy(True), "suburbs.csv")
-    question_7(df1.copy(True), "suburbs.csv")
-    question_7(df1.copy(True), "suburbs.csv")
-    question_8(df1.copy(True))
+    df4 = question_4(df3.copy(True))
+    df5 = question_5(df3.copy(True), "suburbs.csv")
+    table = question_6(df3.copy(True))
+    question_7(df3.copy(True), "suburbs.csv")
+    question_8(df3.copy(True))
