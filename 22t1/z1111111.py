@@ -66,7 +66,7 @@ def question_3(df1):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 3", output_df=df3[['modified_transport_name'], ['transport_name']], other=df3.shape)
+    log("QUESTION 3", output_df=df3[['transport_name']], other=df3.shape)
     return df3
 
 
@@ -83,7 +83,7 @@ def question_4(df3):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 4", output_df=df4[["transport-type", "routes"]], other=df4.shape)
+    log("QUESTION 4", output_df=df4[["transport-type", "frequency"]], other=df4.shape)
     return df4
 
 
