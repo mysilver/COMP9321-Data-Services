@@ -36,7 +36,7 @@ def question_1(routes):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 1", output_df=df1[["route_search_name", "start", "end"]], other=df1.shape)
+    log("QUESTION 1", output_df=df1[["service_direction_name", "start", "end"]], other=df1.shape)
     return df1
 
 
