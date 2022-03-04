@@ -83,7 +83,7 @@ def question_4(df3):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 4", output_df=df4[["transport-type", "frequency"]], other=df4.shape)
+    log("QUESTION 4", output_df=df4[["transport_name", "frequency"]], other=df4.shape)
     return df4
 
 
