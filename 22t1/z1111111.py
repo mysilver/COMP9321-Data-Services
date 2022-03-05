@@ -24,9 +24,10 @@ def log(question, output_df, other):
         print(df.to_string())
 
 
-def question_1(routes):
+def question_1(routes, suburbs):
     """
-    :param exposure: the path for the routes dataset
+    :param routes: the path for the routes dataset
+    :param suburbs: the path for the routes suburbs
     :return: df1
             Data Type: Dataframe
             Please read the assignment specs to know how to create the output dataframe
@@ -149,7 +150,7 @@ def question_8(df3):
 
 
 if __name__ == "__main__":
-    df1 = question_1("routes.csv")
+    df1 = question_1("routes.csv", "suburbs.csv")
     df2 = question_2(df1.copy(True))
     df3 = question_3(df1.copy(True))
     df4 = question_4(df3.copy(True))
