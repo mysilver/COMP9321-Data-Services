@@ -100,7 +100,7 @@ def question_5(df3, suburbs):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 5", output_df=df5[["depots", "ratio"]], other=df5.shape)
+    log("QUESTION 5", output_df=df5[["ratio"]], other=df5.shape)
     return df5
 
 
