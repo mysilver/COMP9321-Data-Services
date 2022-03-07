@@ -134,7 +134,7 @@ def question_7(df3,suburbs):
     plt.savefig("{}-Q7.png".format(studentid))
 
 
-def question_8(df3):
+def question_8(df3,suburbs):
     """
     :param df3: the dataframe created in question 3
     :param suburbs : the path to dataset
@@ -157,4 +157,4 @@ if __name__ == "__main__":
     df5 = question_5(df3.copy(True), "suburbs.csv")
     table = question_6(df3.copy(True))
     question_7(df3.copy(True), "suburbs.csv")
-    question_8(df3.copy(True))
+    question_8(df3.copy(True), "suburbs.csv")
