@@ -107,7 +107,7 @@ def question_5(df3, suburbs):
 def question_6(df3):
     """
     :param df3: the dataframe created in question 3
-    :return: nothing, but saves the figure on the disk
+    :return: pandas pivot table
     """
     table = None
     #################################################
