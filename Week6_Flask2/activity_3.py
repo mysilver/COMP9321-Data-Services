@@ -16,7 +16,7 @@ api = Api(app,
 
 # The following is the schema of Book
 book_model = api.model('Book', {
-    'Flickr_URL': fields.String,
+    'Flickr_URL': fields.String(example="jeee"),
     'Publisher': fields.String,
     'Author': fields.String,
     'Title': fields.String,
@@ -166,4 +166,4 @@ if __name__ == '__main__':
     df.set_index('Identifier', inplace=True)
 
     # run the application
-    app.run(debug=True)
+    app.run(debug=True, port="8080")
