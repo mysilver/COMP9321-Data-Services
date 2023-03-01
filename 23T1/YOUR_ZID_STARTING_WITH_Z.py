@@ -24,7 +24,7 @@ def log(question, output_df, other):
         print(df.to_string())
 
 
-def question_1(routes, suburbs):
+def question_1(city_pairs, seats):
     """
     :param routes: the path for the routes dataset
     :param suburbs: the path for the routes suburbs
@@ -37,7 +37,7 @@ def question_1(routes, suburbs):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 1", output_df=df1[["service_direction_name", "start", "end"]], other=df1.shape)
+    log("QUESTION 1", output_df=df1[["AustralianPort", "ForeignPort", "passenger_in_out", "freight_in_out", "mail_in_out"]], other=df1.shape)
     return df1
 
 
@@ -67,14 +67,13 @@ def question_3(df1):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 3", output_df=df3[['transport_name']], other=df3.shape)
+    log("QUESTION 3", output_df=df3, other=df3.shape)
     return df3
 
 
-def question_4(df3):
+def question_4(df1):
     """
-    :param df3: the dataframe created in question 3
-    :param continents: the path for the Countries-Continents.csv file
+    :param df1: the dataframe created in question 3
     :return: df4
             Data Type: Dataframe
             Please read the assignment specs to know how to create the output dataframe
@@ -84,46 +83,43 @@ def question_4(df3):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 4", output_df=df4[["transport_name", "frequency"]], other=df4.shape)
+    log("QUESTION 4", output_df=df4, other=df4.shape)
     return df4
 
 
-def question_5(df3, suburbs):
+def question_5(seats):
     """
-    :param df3: the dataframe created in question 2
-    :param suburbs : the path to dataset
+    :param seats : the path to dataset
     :return: df5
             Data Type: dataframe
-            Please read the assignment specs to know how to create the output dataframe
+            Please read the assignment specs to know how to create the  output dataframe
     """
     #################################################
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 5", output_df=df5[["ratio"]], other=df5.shape)
+    log("QUESTION 5", output_df=df5, other=df5.shape)
     return df5
 
 
-def question_6(df3):
+def question_6(df5):
     """
-    :param df3: the dataframe created in question 3
-    :return: pandas pivot table
+    :param df5: the dataframe created in question 5
+    :return: df6
     """
-    table = None
+
     #################################################
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 6", output_df=None, other=table)
-    return table
+    log("QUESTION 6", output_df=df6, other=table)
+    return df6
 
 
-
-
-def question_7(df3,suburbs):
+def question_7(seats, city_pairs):
     """
-    :param df3: the dataframe created in question 3
-    :param suburbs : the path to dataset
+    :param seats: the path to dataset
+    :param city_pairs : the path to dataset
     :return: nothing, but saves the figure on the disk
     """
 
@@ -134,27 +130,11 @@ def question_7(df3,suburbs):
     plt.savefig("{}-Q7.png".format(studentid))
 
 
-def question_8(df3,suburbs):
-    """
-    :param df3: the dataframe created in question 3
-    :param suburbs : the path to dataset
-    :return: nothing, but saves the figure on the disk
-    """
-
-    #################################################
-    # Your code goes here ...
-    #################################################
-
-    plt.savefig("{}-Q8.png".format(studentid))
-
-
-
 if __name__ == "__main__":
-    df1 = question_1("routes.csv", "suburbs.csv")
+    df1 = question_1("city_pairs.csv")
     df2 = question_2(df1.copy(True))
     df3 = question_3(df1.copy(True))
-    df4 = question_4(df3.copy(True))
-    df5 = question_5(df3.copy(True), "suburbs.csv")
-    table = question_6(df3.copy(True))
-    question_7(df3.copy(True), "suburbs.csv")
-    question_8(df3.copy(True), "suburbs.csv")
+    df4 = question_4(df1.copy(True))
+    df5 = question_5("seats.csv")
+    df6 = question_6(df5.copy(True))
+    question_7("seats.csv", "city_pairs.csv")
