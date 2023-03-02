@@ -24,10 +24,8 @@ def log(question, output_df, other):
         print(df.to_string())
 
 
-def question_1(city_pairs, seats):
+def question_1(city_pairs):
     """
-    :param routes: the path for the routes dataset
-    :param suburbs: the path for the routes suburbs
     :return: df1
             Data Type: Dataframe
             Please read the assignment specs to know how to create the output dataframe
