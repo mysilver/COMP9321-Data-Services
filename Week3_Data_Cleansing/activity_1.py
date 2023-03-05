@@ -4,13 +4,13 @@ import pandas as pd
 def print_dataframe(dataframe, print_column=True, print_rows=True):
     # print column names
     if print_column:
-        print(",".join([column for column in dataframe]))
+        print(','.join(dataframe.columns))
 
     # print rows one by one
     if print_rows:
-        for index, row in dataframe.iterrows():
-            print(",".join([str(row[column]) for column in dataframe]))
-
+        for row in dataframe.itertuples(index=False, name=None):
+            row = ','.join(str(col) for col in row)
+            print(row)
 
 if __name__ == "__main__":
     columns_to_drop = ['Edition Statement',

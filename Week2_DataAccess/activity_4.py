@@ -27,9 +27,8 @@ def json_to_dataframe(json_obj):
     json_data = json_obj['data']
 
     # to create a dataframe we also need the name of the columns:
-    columns = []
-    for c in json_obj['meta']['view']['columns']:
-        columns.append(c['name'])
+    columns_obj = json_obj['meta']['view']['columns']
+    columns = [c['name'] for c in columns_obj]
 
     return pd.DataFrame(data=json_data, columns=columns)
 
@@ -37,16 +36,16 @@ def json_to_dataframe(json_obj):
 def print_dataframe(dataframe, print_column=True, print_rows=True):
     # print column names
     if print_column:
-        print(",".join([column for column in dataframe]))
+        print(','.join(dataframe.columns))
 
     # print rows one by one
     if print_rows:
-        for index, row in dataframe.iterrows():
-            print(",".join([str(row[column]) for column in dataframe]))
-            
-            
-if __name__ == '__main__':
+        for row in dataframe.itertuples(index=False, name=None):
+            row = ','.join(str(col) for col in row)
+            print(row)
 
+
+if __name__ == '__main__':
     url = "https://data.cityofnewyork.us/api/views/kku6-nxdu/rows.json"
 
     print("Fetch the json")

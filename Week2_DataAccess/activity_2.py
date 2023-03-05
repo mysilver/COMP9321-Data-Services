@@ -44,4 +44,8 @@ if __name__ == '__main__':
     print("Querying the database")
     queried_df = read_from_sqlite(database_file, table_name)
 
-    print(queried_df.to_string())
+    pd.set_option('display.width', 1000)
+    pd.options.display.max_colwidth = 3
+    pd.set_option('display.max_columns', 7)
+
+    print(queried_df.head(10))
