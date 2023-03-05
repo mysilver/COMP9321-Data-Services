@@ -71,7 +71,7 @@ def question_3(df1):
 
 def question_4(df1):
     """
-    :param df1: the dataframe created in question 3
+    :param df1: the dataframe created in question 1
     :return: df4
             Data Type: Dataframe
             Please read the assignment specs to know how to create the output dataframe
@@ -110,7 +110,7 @@ def question_6(df5):
     # Your code goes here ...
     #################################################
 
-    log("QUESTION 6", output_df=df6, other=table)
+    log("QUESTION 6", output_df=df6, other=df6.shape)
     return df6
 
 
