@@ -24,33 +24,16 @@ def json_to_dataframe(json_obj):
     :return: A dataframe
     """
     # let's get the list of statistics for all zip codes
-    json_data = json_obj['data']
+    json_data = json_obj
 
-    # to create a dataframe we also need the name of the columns:
-    columns_obj = json_obj['meta']['view']['columns']
-    columns = [c['name'] for c in columns_obj]
-
-    return pd.DataFrame(data=json_data, columns=columns)
-
-
-def print_dataframe(dataframe, print_column=True, print_rows=True):
-    # print column names
-    if print_column:
-        print(','.join(dataframe.columns))
-
-    # print rows one by one
-    if print_rows:
-        for row in dataframe.itertuples(index=False, name=None):
-            row = ','.join(str(col) for col in row)
-            print(row)
-
+    return pd.DataFrame.from_records(json_data)
 
 if __name__ == '__main__':
-    url = "https://data.cityofnewyork.us/api/views/kku6-nxdu/rows.json"
+    url = "https://raw.githubusercontent.com/joseluisq/json-datasets/master/json/operating-systems/macosx_releases.json"
 
     print("Fetch the json")
     json_obj = get_json(url)
 
     print("Convert the json object to a dataframe")
     df = json_to_dataframe(json_obj)
-    print_dataframe(df)
+    print(df.to_string())
