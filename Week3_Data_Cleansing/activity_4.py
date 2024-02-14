@@ -1,16 +1,6 @@
 import pandas as pd
 
 
-def print_dataframe(dataframe, print_column=True, print_rows=True):
-    # print column names
-    if print_column:
-        print(','.join(dataframe.columns))
-
-    # print rows one by one
-    if print_rows:
-        for row in dataframe.itertuples(index=False, name=None):
-            row = ','.join(str(col) for col in row)
-            print(row)
 
 def clean(dataframe):
     dataframe['Place of Publication'] = dataframe['Place of Publication'].apply(
@@ -44,4 +34,4 @@ if __name__ == "__main__":
     df = gb_df['Identifier'].count()
 
     # print the dataframe which shows publication number by country
-    print_dataframe(df)
+    print(df.to_string())

@@ -1,17 +1,5 @@
 import pandas as pd
 
-
-def print_dataframe(dataframe, print_column=True, print_rows=True):
-    # print column names
-    if print_column:
-        print(','.join(dataframe.columns))
-
-    # print rows one by one
-    if print_rows:
-        for row in dataframe.itertuples(index=False, name=None):
-            row = ','.join(str(col) for col in row)
-            print(row)
-
 def clean(dataframe):
     dataframe['Place of Publication'] = dataframe['Place of Publication'].apply(
         lambda x: 'London' if 'London' in x else x.replace('-', ' '))
@@ -36,6 +24,6 @@ if __name__ == "__main__":
     #
     df = df.query('Date_of_Publication > 1866 and Place_of_Publication == "London"')
 
-    print_dataframe(df)
+    print(df.to_string())
 
 

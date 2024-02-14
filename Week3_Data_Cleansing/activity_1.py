@@ -1,17 +1,6 @@
 import pandas as pd
 
 
-def print_dataframe(dataframe, print_column=True, print_rows=True):
-    # print column names
-    if print_column:
-        print(','.join(dataframe.columns))
-
-    # print rows one by one
-    if print_rows:
-        for row in dataframe.itertuples(index=False, name=None):
-            row = ','.join(str(col) for col in row)
-            print(row)
-
 if __name__ == "__main__":
     columns_to_drop = ['Edition Statement',
                        'Corporate Author',
@@ -34,7 +23,7 @@ if __name__ == "__main__":
 
     print("****************************************")
     print("Dataframe before dropping the columns")
-    print_dataframe(df, print_rows=False)
+    print(df.to_string())
 
     print("****************************************")
     print("Dataframe after dropping the columns")
@@ -43,5 +32,5 @@ if __name__ == "__main__":
     # Inplace=True indicates that the changes should be applied to the given dataframe instead of creating a new one
     # axis=1 : Whether to drop labels from the index (0 / 'index') or columns (1 / 'columns').
 
-    print_dataframe(df, print_rows=False)
+    print(df.to_string())
     print("****************************************")
