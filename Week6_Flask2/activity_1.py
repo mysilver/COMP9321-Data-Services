@@ -30,6 +30,7 @@ parser.add_argument('ascending', type=inputs.boolean)
 @api.route('/books')
 class BooksList(Resource):
 
+    @api.expect(parser)
     def get(self):
         # get books as JSON string
         args = parser.parse_args()
@@ -57,6 +58,7 @@ class BooksList(Resource):
 
 @api.route('/books/<int:id>')
 class Books(Resource):
+
     def get(self, id):
         if id not in df.index:
             api.abort(404, "Book {} doesn't exist".format(id))

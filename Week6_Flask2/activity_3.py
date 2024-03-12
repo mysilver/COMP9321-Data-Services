@@ -35,6 +35,7 @@ class BooksList(Resource):
 
     @api.response(200, 'Successful')
     @api.doc(description="Get all books")
+    @api.expect(parser)
     def get(self):
         # get books as JSON string
         args = parser.parse_args()

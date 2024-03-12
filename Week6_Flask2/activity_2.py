@@ -30,6 +30,7 @@ parser.add_argument('ascending', type=inputs.boolean)
 @api.route('/books')
 class BooksList(Resource):
 
+    @api.expect(parser)
     def get(self):
         # get books as JSON string
         args = parser.parse_args()
