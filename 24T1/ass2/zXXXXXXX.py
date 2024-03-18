@@ -47,11 +47,17 @@ Getting Started
 Submission
 ----------
 
-The only file you will submit is this Python file.
+You need to submit this Python file and a `requirements.txt` file.
 
-You can submit your code using the following command when connected to CSE, and
-assuming your file is in the current directory (remember to replace `zid` with
-your actual zID, i.e. the name of this file after renaming it):
+The `requirements.txt` file should list all the Python packages your code relies
+on, and their versions.  You can generate this file by running the following
+command while your virtual environment is active:
+
+pip freeze > requirements.txt
+
+You can submit the two files using the following command when connected to CSE,
+and assuming the files are in the current directory (remember to replace `zid`
+with your actual zID, i.e. the name of this file after renaming it):
 
 give cs9321 assign2 zid.py requirements.txt
 
@@ -90,4 +96,5 @@ if __name__ == "__main__":
     # Here's a quick example of using the Generative AI API:
     question = "Give me some facts about UNSW!"
     response = gemini.generate_content(question)
-    print(question, response.text)
+    print(question)
+    print(response.text)
