@@ -68,13 +68,13 @@ from pathlib import Path
 # You can import more third-party packages here if you need them, provided
 # that they've been used in the weekly labs, or specified in this assignment,
 # and their versions match.
-from dotenv import load_dotenv          # needed to load the environment variables from the .env file
-import google.generativeai as genai     # needed to access the Generative AI API
+from dotenv import load_dotenv          # Needed to load the environment variables from the .env file
+import google.generativeai as genai     # Needed to access the Generative AI API
 
 
 studentid = Path(__file__).stem         # Will capture your zID from the filename.
 db_file   = f"{studentid}.db"           # Use this variable when referencing the SQLite database file.
-pdf_file  = f"{studentid}.pdf"          # Use this variable when referencing the PDF file.
+txt_file  = f"{studentid}.txt"          # Use this variable when referencing the txt file for Q7.
 
 
 # Load the environment variables from the .env file
