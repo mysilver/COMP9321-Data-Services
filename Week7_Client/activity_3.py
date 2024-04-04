@@ -30,6 +30,9 @@ if __name__ == '__main__':
     # update the book information
     print("***** Updating Book Information *****")
     book['Author'] = 'Nobody'
+    book['Identifier'] = 206
+    book['Date_of_Publication']= 1879
+    print(book)
     r = requests.put("http://127.0.0.1:5000/books/206", json=book)
     print("Put status Code:" + str(r.status_code))
     print(r.json()['message'])
