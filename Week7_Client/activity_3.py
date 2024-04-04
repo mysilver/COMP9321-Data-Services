@@ -25,7 +25,7 @@ def get_book(id):
 if __name__ == '__main__':
 
     print("***** Book information before update *****")
-    book = get_book(206)
+    book = get_book('206')
 
     # update the book information
     print("***** Updating Book Information *****")
@@ -35,5 +35,5 @@ if __name__ == '__main__':
     print(r.json()['message'])
 
     print("***** Book information after update *****")
-    book = get_book(206)
+    book = get_book('206')
 

@@ -29,12 +29,12 @@ def remove_book(id):
 if __name__ == '__main__':
 
     print("***** Book information before update *****")
-    book = get_book(206)
+    book = get_book('206')
 
     # update the book information
     print("***** Deleting Book *****")
-    remove_book(206)
+    remove_book('206')
 
     print("***** Book information after Delete *****")
-    book = get_book(206)
+    book = get_book('206')
 
