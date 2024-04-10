@@ -41,7 +41,7 @@ if __name__ == '__main__':
     for i, label in enumerate(df['species']):
 
         label = label[0:4]
-        ax.annotate(label, (list(df['petal_length'])[i], list(df['petal_width'])[i]), color='gray', fontSize=9,
+        ax.annotate(label, (list(df['petal_length'])[i], list(df['petal_width'])[i]), color='gray', fontsize=9,
                     horizontalalignment='left',
                     verticalalignment='bottom')
 

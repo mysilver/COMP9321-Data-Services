@@ -41,7 +41,7 @@ if __name__ == '__main__':
     for i, label in enumerate(df['Diet']):
 
         label = "Diet_" + str(label)
-        ax.annotate(label, (list(df['pre.weight'])[i], list(df['weight6weeks'])[i]), color='gray', fontSize=9,
+        ax.annotate(label, (list(df['pre.weight'])[i], list(df['weight6weeks'])[i]), color='gray', fontsize=9,
                     horizontalalignment='left',
                     verticalalignment='bottom')
 
