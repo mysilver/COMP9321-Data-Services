@@ -4,8 +4,8 @@ from sklearn.cluster import KMeans, SpectralClustering, AgglomerativeClustering
 from sklearn.utils import shuffle
 
 
-def load_iris(iris_path):
-    df = pd.read_csv(iris_path)
+def load_dataset(dataset_path):
+    df = pd.read_csv(dataset_path)
 
     df = shuffle(df)
     df_without_label = df.drop('Diet', axis=1)
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     csv_file = 'diet.csv'
 
     # Split the data into test and train parts
-    df, df_without_label = load_iris(csv_file)
+    df, df_without_label = load_dataset(csv_file)
     # Fit a k-means estimator
     estimator = AgglomerativeClustering(n_clusters=3)
     estimator.fit(df_without_label)
