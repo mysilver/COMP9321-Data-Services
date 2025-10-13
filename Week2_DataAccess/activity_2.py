@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 from pandas.io import sql
-
+import os
 
 def read_csv(csv_file):
     """
@@ -22,14 +22,15 @@ def write_in_sqlite(dataframe, database_file, table_name):
     sql.to_sql(dataframe, name=table_name, con=cnx)
 
 
-def read_from_sqlite(database_file, table_name):
+def read_from_sqlite(database_file, table_name, index_col=None):
     """
     :param database_file: where the database is stored
     :param table_name: the name of the table
+    :param index_col (optional): name of columns in db as index
     :return: A Dataframe
     """
     cnx = sqlite3.connect(database_file)
-    return sql.read_sql('select * from ' + table_name, cnx)
+    return sql.read_sql('select * from ' + table_name, cnx, index_col=index_col)
 
 
 if __name__ == '__main__':
@@ -39,10 +40,13 @@ if __name__ == '__main__':
     loaded_df = read_csv(csv_file)
 
     print("Creating database")
-    write_in_sqlite(loaded_df, database_file, table_name)
-
+    if os.path.exists(database_file):
+        print(database_file + "already exists.")
+    else:
+        write_in_sqlite(loaded_df, database_file, table_name)
+        
     print("Querying the database")
-    queried_df = read_from_sqlite(database_file, table_name)
+    queried_df = read_from_sqlite(database_file, table_name, index_col='index')
 
     pd.set_option('display.width', 1000)
     pd.options.display.max_colwidth = 3
