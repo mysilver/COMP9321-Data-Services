@@ -34,8 +34,8 @@ def write_in_mongodb(dataframe, mongo_host, mongo_port, db_name, collection):
     db = client[db_name]
     c = db[collection]
     # You can only store documents in mongodb;
-    # so you need to convert rows inside the dataframe into a list of json objects
-    records = json.loads(dataframe.T.to_json()).values()
+    # converts a DataFrame into a list of dictionaries
+    records = dataframe.to_dict('records')
     c.insert_many(records)
 
 
