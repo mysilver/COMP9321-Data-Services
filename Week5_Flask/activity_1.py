@@ -43,20 +43,21 @@ columns_to_drop = [
 df = pd.read_csv(csv_file)
 
 # Drop unnecessary columns
-df.drop(columns=columns_to_drop, inplace=True)
+df.drop(columns=columns_to_drop, inplace=True, errors="ignore")
+
+# Replace spaces in column names with underscores
+df.columns = df.columns.str.replace(' ', '_', regex=False)
 
 # Extract 4-digit year from 'Date of Publication' and convert to numeric
 # Any missing or invalid years will be replaced with 0
-df['Date of Publication'] = (
-    df['Date of Publication']
+df['Date_of_Publication'] = (
+    df['Date_of_Publication']
     .str.extract(r'^(\d{4})', expand=False)  # Extract 4-digit year
     .astype(float)                           # Convert to numeric
     .fillna(0)                               # Fill missing values with 0
     .astype(int)                             # Optional: make integer
 )
 
-# Replace spaces in column names with underscores
-df.columns = df.columns.str.replace(' ', '_', regex=False)
 
 # Set the 'Identifier' column as the DataFrame index for fast lookup
 df.set_index('Identifier', inplace=True)
