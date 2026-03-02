@@ -1,14 +1,42 @@
-import numpy
+import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import precision_score, accuracy_score, recall_score
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import precision_score, recall_score, accuracy_score
 
 
-def load_exposure(exposure_path, split_percentage, strategy):
-    df = pd.read_csv(exposure_path, delimiter=";", encoding="ISO-8859-1").head(2000)
+def load_exposure(exposure_path: str,
+                  test_size: float = 0.3,
+                  strategy: str = "mean",
+                  random_state: int = 42):
+    """
+    Load and preprocess the exposure dataset.
 
+    Steps:
+    - Read CSV
+    - Select relevant columns
+    - Clean numeric columns
+    - Encode categorical features
+    - Impute missing values
+    - Split into train/test sets
+
+    :param exposure_path: Path to CSV file
+    :param test_size: Fraction of dataset used for testing
+    :param strategy: Imputation strategy ('mean', 'median', 'most_frequent', 'constant')
+    :param random_state: Seed for reproducibility
+    :return: X_train, X_test, y_train, y_test
+    """
+
+    # Load dataset (limit to first 2000 rows for performance)
+    df = pd.read_csv(
+        exposure_path,
+        delimiter=";",
+        encoding="ISO-8859-1"
+    ).head(2000)
+
+    # Select relevant columns
     df = df[[
         'GHRP',
         'Aid dependence',
@@ -23,56 +51,87 @@ def load_exposure(exposure_path, split_percentage, strategy):
         'Covid_19_Economic_exposure_index',
         'Income classification according to WB'
     ]]
-    columns = ["Remittances", "Aid dependence", "Foreign direct investment", 'Foreign currency reserves',
-               'Foreign direct investment, net inflows percent of GDP', 'tourism dependence',
-               'tourism as percentage of GDP', 'food import dependence ',
-               'primary commodity export dependence',
-               'Covid_19_Economic_exposure_index', ]
 
+    # Remove rows where target is missing
     df = df[df['Income classification according to WB'].notna()]
 
-    for column in columns:
-        df[column] = df[column].apply(lambda a: numpy.nan if a == "x" else float(str(a).replace(",", ".")))
+    # Numeric columns
+    numeric_columns = [
+        "Remittances",
+        "Aid dependence",
+        "Foreign direct investment",
+        "Foreign currency reserves",
+        "Foreign direct investment, net inflows percent of GDP",
+        "tourism dependence",
+        "tourism as percentage of GDP",
+        "food import dependence ",
+        "primary commodity export dependence",
+        "Covid_19_Economic_exposure_index",
+    ]
 
-    # Ordinal Encoders
-    encGhrp = OrdinalEncoder()
+    # Clean numeric columns
+    for col in numeric_columns:
+        df[col] = (
+            df[col]
+            .replace("x", np.nan)
+            .astype(str)
+            .str.replace(",", ".", regex=False)
+        )
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # Encode categorical column 'GHRP'
     df['GHRP'] = df['GHRP'].fillna("Unknown")
-    df['GHRP'] = encGhrp.fit_transform(df[['GHRP']])
+    encoder = OrdinalEncoder()
+    df['GHRP'] = encoder.fit_transform(df[['GHRP']])
 
-    for column in columns:
-        imputer = SimpleImputer(missing_values=numpy.nan, strategy=strategy)
-        df[column] = imputer.fit_transform(df[[column]])
+    # Impute missing numeric values (single imputer for all columns)
+    imputer = SimpleImputer(strategy=strategy)
+    df[numeric_columns] = imputer.fit_transform(df[numeric_columns])
 
-    exposure_x = df.drop('Income classification according to WB', axis=1).values
-    exposure_y = df['Income classification according to WB'].values
+    # Separate features and target
+    X = df.drop('Income classification according to WB', axis=1).values
+    y = df['Income classification according to WB'].values
 
-    # Split exposure data in train and test data
-    split_point = int(len(exposure_x) * split_percentage)
-    exposure_X_train = exposure_x[:split_point]
-    exposure_y_train = exposure_y[:split_point]
-    exposure_X_test = exposure_x[split_point:]
-    exposure_y_test = exposure_y[split_point:]
+    # Train/test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=test_size,
+        random_state=random_state,
+        shuffle=True
+    )
 
-    return exposure_X_train, exposure_y_train, exposure_X_test, exposure_y_test
+    return X_train, X_test, y_train, y_test
 
 
-if __name__ == '__main__':
+def main():
     csv_file = 'exposure.csv'
 
-    # Split the data into test and train parts
-    for strategy in ["mean", "median", "most_frequent", "constant"]:
-        exposure_X_train, exposure_y_train, exposure_X_test, exposure_y_test \
-            = load_exposure(csv_file, split_percentage=0.7, strategy=strategy)
+    strategies = ["mean", "median", "most_frequent", "constant"]
 
-        # train a classifier
-        dt = DecisionTreeClassifier()
-        dt.fit(exposure_X_train, exposure_y_train)
+    for strategy in strategies:
+        print("\n" + "*" * 25, strategy.upper(), "*" * 25)
 
-        # predict the test set
-        predictions = dt.predict(exposure_X_test)
+        # Load data using chosen imputation strategy
+        X_train, X_test, y_train, y_test = load_exposure(
+            csv_file,
+            test_size=0.3,
+            strategy=strategy
+        )
 
-        print("*************************** "+strategy+" ***********************************")
-        print("precision:\t", precision_score(exposure_y_test, predictions, average=None))
-        print("recall:\t\t", recall_score(exposure_y_test, predictions, average=None))
-        print("accuracy:\t", accuracy_score(exposure_y_test, predictions))
+        # Initialize classifier (reproducible)
+        model = DecisionTreeClassifier(random_state=42)
 
+        # Train model
+        model.fit(X_train, y_train)
+
+        # Predict
+        predictions = model.predict(X_test)
+
+        # Evaluate
+        print("Accuracy:\t", accuracy_score(y_test, predictions))
+        print("Precision:\t", precision_score(y_test, predictions, average=None))
+        print("Recall:\t\t", recall_score(y_test, predictions, average=None))
+
+
+if __name__ == "__main__":
+    main()

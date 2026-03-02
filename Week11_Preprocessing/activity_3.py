@@ -1,13 +1,33 @@
-import numpy
+import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import precision_score, accuracy_score, recall_score
 from sklearn.preprocessing import OrdinalEncoder, PolynomialFeatures
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import precision_score, recall_score, accuracy_score
 
 
-def load_exposure(exposure_path, split_percentage, strategy):
-    df = pd.read_csv(exposure_path, delimiter=";", encoding="ISO-8859-1").head(2000)
+def load_exposure(exposure_path: str,
+                  test_size: float = 0.3,
+                  strategy: str = "most_frequent",
+                  random_state: int = 42):
+    """
+    Load and preprocess exposure dataset.
+
+    Steps:
+    - Read CSV
+    - Select relevant columns
+    - Clean numeric columns
+    - Encode categorical features
+    - Impute missing values
+    - Split into train/test sets
+    """
+
+    df = pd.read_csv(
+        exposure_path,
+        delimiter=";",
+        encoding="ISO-8859-1"
+    ).head(2000)
 
     df = df[[
         'GHRP',
@@ -23,66 +43,92 @@ def load_exposure(exposure_path, split_percentage, strategy):
         'Covid_19_Economic_exposure_index',
         'Income classification according to WB'
     ]]
-    columns = ["Remittances", "Aid dependence", "Foreign direct investment", 'Foreign currency reserves',
-               'Foreign direct investment, net inflows percent of GDP', 'tourism dependence',
-               'tourism as percentage of GDP', 'food import dependence ',
-               'primary commodity export dependence',
-               'Covid_19_Economic_exposure_index', ]
 
+    # Remove rows with missing target
     df = df[df['Income classification according to WB'].notna()]
 
-    for column in columns:
-        df[column] = df[column].apply(lambda a: numpy.nan if a == "x" else float(str(a).replace(",", ".")))
+    numeric_columns = [
+        "Remittances",
+        "Aid dependence",
+        "Foreign direct investment",
+        "Foreign currency reserves",
+        "Foreign direct investment, net inflows percent of GDP",
+        "tourism dependence",
+        "tourism as percentage of GDP",
+        "food import dependence ",
+        "primary commodity export dependence",
+        "Covid_19_Economic_exposure_index",
+    ]
 
-    # Ordinal Encoders
-    encGhrp = OrdinalEncoder()
+    # Clean numeric columns safely
+    for col in numeric_columns:
+        df[col] = (
+            df[col]
+            .replace("x", np.nan)
+            .astype(str)
+            .str.replace(",", ".", regex=False)
+        )
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # Encode categorical column
     df['GHRP'] = df['GHRP'].fillna("Unknown")
-    df['GHRP'] = encGhrp.fit_transform(df[['GHRP']])
+    encoder = OrdinalEncoder()
+    df['GHRP'] = encoder.fit_transform(df[['GHRP']])
 
-    for column in columns:
-        imputer = SimpleImputer(missing_values=numpy.nan, strategy=strategy)
-        df[column] = imputer.fit_transform(df[[column]])
+    # Impute missing numeric values (single imputer)
+    imputer = SimpleImputer(strategy=strategy)
+    df[numeric_columns] = imputer.fit_transform(df[numeric_columns])
 
-    exposure_x = df.drop('Income classification according to WB', axis=1).values
-    exposure_y = df['Income classification according to WB'].values
+    # Split features and target
+    X = df.drop('Income classification according to WB', axis=1).values
+    y = df['Income classification according to WB'].values
 
-    # Split exposure data in train and test data
-    split_point = int(len(exposure_x) * split_percentage)
-    exposure_X_train = exposure_x[:split_point]
-    exposure_y_train = exposure_y[:split_point]
-    exposure_X_test = exposure_x[split_point:]
-    exposure_y_test = exposure_y[split_point:]
+    # Proper shuffled split
+    return train_test_split(
+        X, y,
+        test_size=test_size,
+        random_state=random_state,
+        shuffle=True
+    )
 
-    return exposure_X_train, exposure_y_train, exposure_X_test, exposure_y_test
+
+def evaluate_model(X_train, X_test, y_train, y_test, use_polynomial=False):
+    """
+    Train and evaluate Decision Tree model.
+    Optionally applies polynomial feature expansion.
+    """
+
+    if use_polynomial:
+        # IMPORTANT: fit only on training data (avoid data leakage)
+        poly = PolynomialFeatures(degree=2, include_bias=False)
+        X_train = poly.fit_transform(X_train)
+        X_test = poly.transform(X_test)
+
+    model = DecisionTreeClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
+
+    print("\nWith PolynomialFeatures:" if use_polynomial else "\nWithout PolynomialFeatures:")
+    print("Accuracy:\t", accuracy_score(y_test, predictions))
+    print("Precision:\t", precision_score(y_test, predictions, average=None))
+    print("Recall:\t\t", recall_score(y_test, predictions, average=None))
 
 
-if __name__ == '__main__':
-    csv_file = 'exposure.csv'
+def main():
+    csv_file = "exposure.csv"
 
-    # Split the data into test and train parts
-    exposure_X_train, exposure_y_train, exposure_X_test, exposure_y_test \
-        = load_exposure(csv_file, split_percentage=0.7, strategy="most_frequent")
+    X_train, X_test, y_train, y_test = load_exposure(
+        csv_file,
+        test_size=0.3,
+        strategy="most_frequent"
+    )
 
-    # train a classifier
-    dt = DecisionTreeClassifier()
-    dt.fit(exposure_X_train, exposure_y_train)
+    # Evaluate without polynomial features
+    evaluate_model(X_train, X_test, y_train, y_test, use_polynomial=False)
 
-    # predict the test set
-    predictions = dt.predict(exposure_X_test)
+    # Evaluate with polynomial features
+    evaluate_model(X_train, X_test, y_train, y_test, use_polynomial=True)
 
-    print("*************************** without PolynomialFeatures ***********************************")
-    print("precision:\t", precision_score(exposure_y_test, predictions, average=None))
-    print("recall:\t\t", recall_score(exposure_y_test, predictions, average=None))
-    print("accuracy:\t", accuracy_score(exposure_y_test, predictions))
 
-    poly = PolynomialFeatures(1)
-    exposure_X_train_scaled = poly.fit_transform(exposure_X_train)
-    exposure_X_test_scaled = poly.fit_transform(exposure_X_test)
-    dt = DecisionTreeClassifier()
-    dt.fit(exposure_X_train_scaled, exposure_y_train)
-    predictions = dt.predict(exposure_X_test_scaled)
-
-    print("*************************** with PolynomialFeatures ***********************************")
-    print("precision:\t", precision_score(exposure_y_test, predictions, average=None))
-    print("recall:\t\t", recall_score(exposure_y_test, predictions, average=None))
-    print("accuracy:\t", accuracy_score(exposure_y_test, predictions))
+if __name__ == "__main__":
+    main()
