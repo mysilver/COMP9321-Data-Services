@@ -45,7 +45,7 @@ columns_to_drop = [
 df = pd.read_csv(csv_file)
 
 # Drop unnecessary columns
-df.drop(columns=columns_to_drop, inplace=True)
+df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
 
 # Extract 4-digit year from 'Date of Publication', convert to int, fill missing with 0
 df['Date of Publication'] = (

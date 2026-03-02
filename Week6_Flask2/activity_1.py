@@ -1,17 +1,36 @@
-import json
+"""
+Books REST API using Flask and pandas
+
+Features:
+- GET /books/<id>      : Retrieve a book by its Identifier.
+- DELETE /books/<id>   : Remove a book by its Identifier.
+- PUT /books/<id>      : Update a book by its Identifier.
+- GET /books           : get all books
+
+Data preprocessing:
+- Drops unnecessary columns
+- Cleans and converts publication year
+- Replaces spaces in column names
+- Sets 'Identifier' as the index
+
+References:
+- pandas documentation: https://pandas.pydata.org/docs/
+- Flask RESTx documentation: https://flask-restx.readthedocs.io/en/latest/
+"""
 
 import pandas as pd
-from flask import Flask
-from flask import request
-from flask_restx import Resource, Api
-from flask_restx import fields
-from flask_restx import inputs
-from flask_restx import reqparse
+from flask import Flask, request
+from flask_restx import Resource, Api, fields
 
+# -------------------------
+# Flask & API Setup
+# -------------------------
 app = Flask(__name__)
 api = Api(app)
 
-# The following is the schema of Book
+# -------------------------
+# Book Model Schema
+# -------------------------
 book_model = api.model('Book', {
     'Flickr_URL': fields.String,
     'Publisher': fields.String,
@@ -22,108 +41,129 @@ book_model = api.model('Book', {
     'Place_of_Publication': fields.String
 })
 
+# -------------------------
+# Load & preprocess CSV
+# -------------------------
+csv_file = "Books.csv"
+columns_to_drop = [
+    'Edition Statement',
+    'Corporate Author',
+    'Corporate Contributors',
+    'Former owner',
+    'Engraver',
+    'Contributors',
+    'Issuance type',
+    'Shelfmarks'
+]
+# Read CSV
+df = pd.read_csv(csv_file)
+
+# Drop unnecessary columns
+df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
+
+# Clean 'Date of Publication' column: extract year and convert to integer
+df['Date_of_Publication'] = (
+    df['Date of Publication']
+    .str.extract(r'^(\d{4})', expand=False)
+    .fillna(0)
+    .astype(int)
+)
+
+# Standardize column names: replace spaces with underscores
+df.columns = df.columns.str.replace(' ', '_', regex=False)
+
+# Set 'Identifier' as the index for fast lookup
+df.set_index('Identifier', inplace=True)
+
+# -------------------------
+# API Endpoints
+# -------------------------
+@api.route('/books/<int:id>')
+class Books(Resource):
+    def get(self, id: int):
+        """Retrieve a book by its Identifier."""
+        if id not in df.index:
+            api.abort(404, f"Book {id} doesn't exist")
+        return df.loc[id].to_dict()
+
+    def delete(self, id: int):
+        """Delete a book by its Identifier."""
+        if id not in df.index:
+            api.abort(404, f"Book {id} doesn't exist")
+        df.drop(id, inplace=True)
+        return {"message": f"Book {id} has been removed."}, 200
+
+    @api.expect(book_model)
+    def put(self, id: int):
+        """Update a book by its Identifier."""
+        if id not in df.index:
+            api.abort(404, f"Book {id} doesn't exist")
+
+        book_data = request.json
+
+        # Ensure Identifier cannot be changed
+        if 'Identifier' in book_data and book_data['Identifier'] != id:
+            return {"message": "Identifier cannot be changed"}, 400
+
+        # Validate keys
+        invalid_keys = [k for k in book_data if k not in book_model.keys()]
+        if invalid_keys:
+            return {"message": f"Invalid properties: {', '.join(invalid_keys)}"}, 400
+
+        # Update book row efficiently using pandas
+        df.loc[id] = pd.Series(book_data)
+        return {"message": f"Book {id} has been successfully updated"}, 200
+
+import json
+from flask_restx import reqparse, inputs
+
+# -------------------------
+# Request parser for /books
+# -------------------------
 parser = reqparse.RequestParser()
-parser.add_argument('order', choices=list(column for column in book_model.keys()))
-parser.add_argument('ascending', type=inputs.boolean)
+parser.add_argument(
+    'order',
+    choices=list(book_model.keys()),
+    help="Column to sort the books by"
+)
+parser.add_argument(
+    'ascending',
+    type=inputs.boolean,
+    default=True,
+    help="Sort order: true=ascending, false=descending"
+)
 
-
+# -------------------------
+# /books endpoint for listing all books
+# -------------------------
 @api.route('/books')
 class BooksList(Resource):
-
     @api.expect(parser)
     def get(self):
-        # get books as JSON string
+        """
+        GET /books
+        Retrieve all books as a list.
+        Optional query parameters:
+          - order: column name to sort by
+          - ascending: true/false sort order
+        """
         args = parser.parse_args()
 
-        # retrieve the query parameters
         order_by = args.get('order')
         ascending = args.get('ascending', True)
 
+        # Sort the dataframe if a valid column is provided
+        df_sorted = df.copy()
         if order_by:
-            df.sort_values(by=order_by, inplace=True, ascending=ascending)
+            df_sorted = df_sorted.sort_values(by=order_by, ascending=ascending)
 
-        json_str = df.to_json(orient='index')
+        # Convert to JSON and prepare the list of dictionaries
+        # Using 'records' orientation avoids the manual index conversion
+        books_list = df_sorted.reset_index().to_dict(orient='records')
 
-        # convert the string JSON to a real JSON
-        ds = json.loads(json_str)
-        ret = []
-
-        for idx in ds:
-            book = ds[idx]
-            book['Identifier'] = int(idx)
-            ret.append(book)
-
-        return ret
-
-
-@api.route('/books/<int:id>')
-class Books(Resource):
-
-    def get(self, id):
-        if id not in df.index:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
-        book = dict(df.loc[id])
-        return book
-
-    def delete(self, id):
-        if id not in df.index:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
-        df.drop(id, inplace=True)
-        return {"message": "Book {} is removed.".format(id)}, 200
-
-    @api.expect(book_model)
-    def put(self, id):
-
-        if id not in df.index:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
-        # get the payload and convert it to a JSON
-        book = request.json
-
-        # Book ID cannot be changed
-        if 'Identifier' in book and id != book['Identifier']:
-            return {"message": "Identifier cannot be changed".format(id)}, 400
-
-        # Update the values
-        for key in book:
-            if key not in book_model.keys():
-                # unexpected column
-                return {"message": "Property {} is invalid".format(key)}, 400
-            df.loc[id, key] = book[key]
-
-        df.append(book, ignore_index=True)
-        return {"message": "Book {} has been successfully updated".format(id)}, 200
-
-
+        return books_list
+# -------------------------
+# Run Flask application
+# -------------------------
 if __name__ == '__main__':
-    columns_to_drop = ['Edition Statement',
-                       'Corporate Author',
-                       'Corporate Contributors',
-                       'Former owner',
-                       'Engraver',
-                       'Contributors',
-                       'Issuance type',
-                       'Shelfmarks'
-                       ]
-    csv_file = "Books.csv"
-    df = pd.read_csv(csv_file)
-
-    # drop unnecessary columns
-    df.drop(columns_to_drop, inplace=True, axis=1)
-
-    # clean the date of publication & convert it to numeric data
-    new_date = df['Date of Publication'].str.extract(r'^(\d{4})', expand=False)
-    new_date = pd.to_numeric(new_date)
-    new_date = new_date.fillna(0)
-    df['Date of Publication'] = new_date
-
-    # replace spaces in the name of columns
-    df.columns = [c.replace(' ', '_') for c in df.columns]
-
-    # set the index column; this will help us to find books with their ids
-    df.set_index('Identifier', inplace=True)
-
-    # run the application
     app.run(debug=True)

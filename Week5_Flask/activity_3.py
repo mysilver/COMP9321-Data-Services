@@ -45,15 +45,21 @@ book_model = api.model('Book', {
 # -------------------------
 csv_file = "Books.csv"
 columns_to_drop = [
-    'Edition Statement', 'Corporate Author', 'Corporate Contributors',
-    'Former owner', 'Engraver', 'Contributors', 'Issuance type', 'Shelfmarks'
+    'Edition Statement',
+    'Corporate Author',
+    'Corporate Contributors',
+    'Former owner',
+    'Engraver',
+    'Contributors',
+    'Issuance type',
+    'Shelfmarks'
 ]
 
 # Read CSV
 df = pd.read_csv(csv_file)
 
 # Drop unnecessary columns
-df.drop(columns=columns_to_drop, inplace=True)
+df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
 
 # Clean 'Date of Publication' column: extract year and convert to integer
 df['Date_of_Publication'] = (
@@ -105,7 +111,7 @@ class Books(Resource):
             return {"message": f"Invalid properties: {', '.join(invalid_keys)}"}, 400
 
         # Update book row efficiently using pandas
-        df.loc[206] = book_data
+        df.loc[id] = pd.Series(book_data)
         return {"message": f"Book {id} has been successfully updated"}, 200
 
 # -------------------------
