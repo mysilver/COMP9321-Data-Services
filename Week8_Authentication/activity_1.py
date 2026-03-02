@@ -1,21 +1,41 @@
-import json
+"""
+Books REST API using Flask, pandas, Flask-RESTx
+With HTTP Basic Authentication documented in Swagger UI
+"""
 from functools import wraps
 
 import pandas as pd
-from flask import Flask
-from flask import request
-from flask_restx import Resource, Api
-from flask_restx import abort
-from flask_restx import fields
-from flask_restx import inputs
-from flask_restx import reqparse
+from flask import Flask, request
+from flask_restx import Resource, Api, fields, reqparse, inputs, abort
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
 
+# -------------------------
+# Flask & API Setup
+# -------------------------
 app = Flask(__name__)
-api = Api(app,
-          default="Books",  # Default namespace
-          title="Book Dataset",  # Documentation Title
-          description="This is just a simple example to show how publish data as a service.")  # Documentation Description
 
+# 🔐 Swagger Security Definition
+authorizations = {
+    'basicAuth': {
+        'type': 'basic'
+    }
+}
+
+api = Api(
+    app,
+    version="1.0",
+    title="Books Management API",
+    description="A CRUD API to manage books using pandas and Flask-RESTx",
+    default="Books",
+    default_label="Book operations",
+    authorizations=authorizations,
+    security='basicAuth'  # Apply globally in Swagger
+)
+
+# -------------------------
+# Basic Authentication Setup
+# -------------------------
 
 def requires_auth(f):
     @wraps(f)
@@ -32,160 +52,159 @@ def requires_auth(f):
     return decorated
 
 
-# The following is the schema of Book
+# -------------------------
+# Load & preprocess CSV
+# -------------------------
+csv_file = "Books.csv"
+
+columns_to_drop = [
+    'Edition Statement',
+    'Corporate Author',
+    'Corporate Contributors',
+    'Former owner',
+    'Engraver',
+    'Contributors',
+    'Issuance type',
+    'Shelfmarks'
+]
+
+df = pd.read_csv(csv_file)
+df.drop(columns=columns_to_drop, inplace=True, errors="ignore")
+df.columns = df.columns.str.replace(' ', '_', regex=False)
+
+df['Date_of_Publication'] = (
+    df['Date_of_Publication']
+    .astype(str)
+    .str.extract(r'^(\d{4})', expand=False)
+    .astype(float)
+    .fillna(0)
+    .astype(int)
+)
+
+df.set_index('Identifier', inplace=True)
+
+# -------------------------
+# Book Model
+# -------------------------
 book_model = api.model('Book', {
-    'Flickr_URL': fields.String,
-    'Publisher': fields.String,
-    'Author': fields.String,
-    'Title': fields.String,
-    'Date_of_Publication': fields.Integer,
-    'Identifier': fields.Integer,
-    'Place_of_Publication': fields.String
+    'Flickr_URL': fields.String(description="URL of book image on Flickr"),
+    'Publisher': fields.String(description="Name of the publisher"),
+    'Author': fields.String(description="Author of the book"),
+    'Title': fields.String(description="Title of the book"),
+    'Date_of_Publication': fields.Integer(description="Year published"),
+    'Identifier': fields.Integer(description="Unique Identifier"),
+    'Place_of_Publication': fields.String(description="Publication place")
 })
 
+# -------------------------
+# Request Parser
+# -------------------------
 parser = reqparse.RequestParser()
-parser.add_argument('order', choices=list(column for column in book_model.keys()))
-parser.add_argument('ascending', type=inputs.boolean)
+parser.add_argument(
+    'order',
+    choices=list(book_model.keys()),
+    help="Column name to sort by"
+)
+parser.add_argument(
+    'ascending',
+    type=inputs.boolean,
+    default=True,
+    help="true = ascending, false = descending"
+)
+
+# -------------------------
+# Individual Book Endpoints
+# -------------------------
+@api.route('/books/<int:id>')
+@api.doc(security='basicAuth')
+class Books(Resource):
+
+    @requires_auth
+    @api.response(200, "Book retrieved")
+    @api.response(404, "Book not found")
+    def get(self, id):
+        if id not in df.index:
+            api.abort(404, f"Book {id} doesn't exist")
+        return df.loc[id].to_dict()
+
+    @requires_auth
+    @api.response(200, "Book deleted")
+    @api.response(404, "Book not found")
+    def delete(self, id):
+        if id not in df.index:
+            api.abort(404, f"Book {id} doesn't exist")
+        df.drop(id, inplace=True)
+        df.to_csv(csv_file, index=True)
+        return {"message": f"Book {id} removed"}, 200
+
+    @api.expect(book_model)
+    @api.response(200, "Book updated")
+    @api.response(400, "Invalid payload")
+    @api.response(404, "Book not found")
+    @requires_auth
+    def put(self, id):
+        if id not in df.index:
+            api.abort(404, f"Book {id} doesn't exist")
+
+        book_data = request.json
+
+        if 'Identifier' in book_data and book_data['Identifier'] != id:
+            return {"message": "Identifier cannot be changed"}, 400
+
+        invalid_keys = [k for k in book_data if k not in book_model.keys()]
+        if invalid_keys:
+            return {"message": f"Invalid properties: {', '.join(invalid_keys)}"}, 400
+
+        df.loc[id] = pd.Series(book_data)
+        df.to_csv(csv_file, index=True)
+        return {"message": f"Book {id} updated"}, 200
 
 
+# -------------------------
+# Books Collection Endpoints
+# -------------------------
 @api.route('/books')
+@api.doc(security='basicAuth')
 class BooksList(Resource):
-    @api.response(200, 'Successful')
-    @api.doc(description="Get all books")
+
+    @api.expect(parser)
+    @api.response(200, "Books retrieved")
     @requires_auth
     def get(self):
-        # get books as JSON string
         args = parser.parse_args()
-
-        # retrieve the query parameters
         order_by = args.get('order')
         ascending = args.get('ascending', True)
 
+        df_sorted = df.copy()
         if order_by:
-            df.sort_values(by=order_by, inplace=True, ascending=ascending)
+            df_sorted = df_sorted.sort_values(by=order_by, ascending=ascending)
 
-        json_str = df.to_json(orient='index')
+        return df_sorted.reset_index().to_dict(orient='records')
 
-        # convert the string JSON to a real JSON
-        ds = json.loads(json_str)
-        ret = []
-
-        for idx in ds:
-            book = ds[idx]
-            book['Identifier'] = int(idx)
-            ret.append(book)
-
-        return ret
-
-    @api.response(201, 'Book Created Successfully')
-    @api.response(400, 'Validation Error')
-    @api.doc(description="Add a new book")
-    @api.expect(book_model, validate=True)
+    @api.expect(book_model)
+    @api.response(201, "Book added")
+    @api.response(400, "Invalid payload")
     @requires_auth
     def post(self):
-        book = request.json
+        book_data = request.json
 
-        if 'Identifier' not in book:
-            return {"message": "Missing Identifier"}, 400
+        invalid_keys = [k for k in book_data if k not in book_model.keys()]
+        if invalid_keys:
+            return {"message": f"Invalid properties: {', '.join(invalid_keys)}"}, 400
 
-        id = book['Identifier']
+        book_id = book_data.get('Identifier')
+        if book_id is None:
+            return {"message": "Identifier is required"}, 400
+        if book_id in df.index:
+            return {"message": f"Book {book_id} already exists"}, 400
 
-        # check if the given identifier does not exist
-        if id in df.index:
-            return {"message": "A book with Identifier={} is already in the dataset".format(id)}, 400
-
-        # Put the values into the dataframe
-        for key in book:
-            if key not in book_model.keys():
-                # unexpected column
-                return {"message": "Property {} is invalid".format(key)}, 400
-            df.loc[id, key] = book[key]
-
-        # df.append(book, ignore_index=True)
-        return {"message": "Book {} is created".format(id)}, 201
+        df.loc[book_id] = pd.Series(book_data)
+        df.to_csv(csv_file, index=True)
+        return {"message": f"Book {book_id} added"}, 201
 
 
-@api.route('/books/<int:id>')
-@api.param('id', 'The Book identifier')
-class Books(Resource):
-    @api.response(404, 'Book was not found')
-    @api.response(200, 'Successful')
-    @api.doc(description="Get a book by its ID")
-    @requires_auth
-    def get(self, id):
-        if id not in df.index:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
-        book = dict(df.loc[id])
-        return book
-
-    @api.response(404, 'Book was not found')
-    @api.response(200, 'Successful')
-    @api.doc(description="Delete a book by its ID")
-    @requires_auth
-    def delete(self, id):
-        if id not in df.index:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
-        df.drop(id, inplace=True)
-        return {"message": "Book {} is removed.".format(id)}, 200
-
-    @api.response(404, 'Book was not found')
-    @api.response(400, 'Validation Error')
-    @api.response(200, 'Successful')
-    @api.expect(book_model, validate=True)
-    @api.doc(description="Update a book by its ID")
-    @requires_auth
-    def put(self, id):
-
-        if id not in df.index:
-            api.abort(404, "Book {} doesn't exist".format(id))
-
-        # get the payload and convert it to a JSON
-        book = request.json
-
-        # Book ID cannot be changed
-        if 'Identifier' in book and id != book['Identifier']:
-            return {"message": "Identifier cannot be changed".format(id)}, 400
-
-        # Update the values
-        for key in book:
-            if key not in book_model.keys():
-                # unexpected column
-                return {"message": "Property {} is invalid".format(key)}, 400
-            df.loc[id, key] = book[key]
-
-        df.append(book, ignore_index=True)
-        return {"message": "Book {} has been successfully updated".format(id)}, 200
-
-
+# -------------------------
+# Run App
+# -------------------------
 if __name__ == '__main__':
-    columns_to_drop = ['Edition Statement',
-                       'Corporate Author',
-                       'Corporate Contributors',
-                       'Former owner',
-                       'Engraver',
-                       'Contributors',
-                       'Issuance type',
-                       'Shelfmarks'
-                       ]
-    csv_file = "Books.csv"
-    df = pd.read_csv(csv_file)
-
-    # drop unnecessary columns
-    df.drop(columns_to_drop, inplace=True, axis=1)
-
-    # clean the date of publication & convert it to numeric data
-    new_date = df['Date of Publication'].str.extract(r'^(\d{4})', expand=False)
-    new_date = pd.to_numeric(new_date)
-    new_date = new_date.fillna(0)
-    df['Date of Publication'] = new_date
-
-    # replace spaces in the name of columns
-    df.columns = [c.replace(' ', '_') for c in df.columns]
-
-    # set the index column; this will help us to find books with their ids
-    df.set_index('Identifier', inplace=True)
-
-    # run the application
     app.run(debug=True)
