@@ -1,3 +1,16 @@
+"""
+Visualizing Iris Dataset with Scatter Plots using pandas and matplotlib
+
+This script demonstrates:
+1. Splitting the Iris dataset by species
+2. Plotting multiple scatter plots with different colors
+3. Comparing sepal and petal measurements
+
+References:
+- pandas.DataFrame.plot.scatter: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.plot.scatter.html
+- matplotlib.pyplot: https://matplotlib.org/stable/api/pyplot_api.html
+"""
+
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
