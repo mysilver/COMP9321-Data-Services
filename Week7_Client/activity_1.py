@@ -1,23 +1,31 @@
 import requests
 
+# -------------------------
+# API base URL
+# -------------------------
+BASE_URL = "http://127.0.0.1:5000"  # Update if your Flask app runs on a different host/port
 
-def print_book(book):
-    print("Book {")
-    for key in book.keys():
-        attr = str(key)
-        # if isinstance(book[key], str):
-        #     val = str(book[key].encode('utf-8'))
-        # else:
-        val = str(book[key])
+# -------------------------
+# Query parameters
+# -------------------------
+params = {
+    "order": "Date_of_Publication",  # Sort by column (must match API column names)
+    "ascending": True                # True = ascending, False = descending
+}
 
-        print("\t" + attr + ":" + val)
-    print("}")
+# -------------------------
+# Make GET request to /books
+# -------------------------
+response = requests.get(f"{BASE_URL}/books", params=params)
 
-
-if __name__ == '__main__':
-
-    r = requests.get("http://127.0.0.1:5000/books", params={'order': 'Date_of_Publication', 'ascending':True})
-    print("Status Code:" + str(r.status_code))
-    books = r.json()
-    for i in range(1, 5):
-        print_book(books[i])
+# -------------------------
+# Handle response
+# -------------------------
+if response.status_code == 200:
+    books = response.json()
+    print(f"Retrieved {len(books)} books:")
+    for book in books:
+        print(f"{book['Identifier']} - {book['Title']} by {book['Author']} ({book['Date_of_Publication']})")
+else:
+    print(f"Failed to retrieve books: {response.status_code}")
+    print(response.json())

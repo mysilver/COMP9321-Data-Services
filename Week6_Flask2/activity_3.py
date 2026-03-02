@@ -37,9 +37,11 @@ api = Api(
 )
 
 # -------------------------
-# CSV File Configuration
+# Load & preprocess CSV
 # -------------------------
 csv_file = "Books.csv"
+
+# Columns to drop from the dataset
 columns_to_drop = [
     'Edition Statement',
     'Corporate Author',
@@ -51,22 +53,28 @@ columns_to_drop = [
     'Shelfmarks'
 ]
 
-# -------------------------
-# Load & preprocess CSV
-# -------------------------
+# Load CSV using pandas
 df = pd.read_csv(csv_file)
-df.drop(columns=columns_to_drop, inplace=True, errors='ignore')
 
+# Drop unnecessary columns
+df.drop(columns=columns_to_drop, inplace=True, errors="ignore")
+
+# Replace spaces in column names with underscores
+df.columns = df.columns.str.replace(' ', '_', regex=False)
+
+# Extract 4-digit year from 'Date of Publication' and convert to numeric
+# Any missing or invalid years will be replaced with 0
 df['Date_of_Publication'] = (
-    df['Date of Publication']
-    .str.extract(r'^(\d{4})', expand=False)
-    .fillna(0)
-    .astype(int)
+    df['Date_of_Publication']
+    .str.extract(r'^(\d{4})', expand=False)  # Extract 4-digit year
+    .astype(float)                           # Convert to numeric
+    .fillna(0)                               # Fill missing values with 0
+    .astype(int)                             # Optional: make integer
 )
 
-df.columns = df.columns.str.replace(' ', '_', regex=False)
-df.set_index('Identifier', inplace=True)
 
+# Set the 'Identifier' column as the DataFrame index for fast lookup
+df.set_index('Identifier', inplace=True)
 # -------------------------
 # Book Model Schema
 # -------------------------

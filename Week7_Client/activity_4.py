@@ -1,40 +1,64 @@
 import requests
+from typing import Dict, Any, Optional
+
+BASE_URL = "http://127.0.0.1:5000"
+TIMEOUT = 5  # seconds
 
 
-def print_book(book):
+def print_book(book: Dict[str, Any]) -> None:
+    """Nicely prints book details."""
     print("Book {")
-    for key in book.keys():
-        attr = str(key)
-        val = str(book[key])
-        print("\t" + attr + ":" + val)
+    for key, val in book.items():
+        print(f"\t{key}: {val}")
     print("}")
 
 
-def get_book(id):
-    r = requests.get("http://127.0.0.1:5000/books/" + str(id))
-    book = r.json()
-    print("Get status Code:" + str(r.status_code))
-    if r.ok:
+def get_book(book_id: int) -> Optional[Dict[str, Any]]:
+    """Retrieve a book by ID from the API."""
+    try:
+        response = requests.get(f"{BASE_URL}/books/{book_id}", timeout=TIMEOUT)
+        print(f"GET status code: {response.status_code}")
+
+        response.raise_for_status()  # Raise exception for 4xx/5xx
+
+        book = response.json()
         print_book(book)
         return book
-    else:
-        print('Error:' + book['message'])
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching book {book_id}: {e}")
+    except ValueError:
+        print("Failed to decode JSON response.")
+    return None
 
 
-def remove_book(id):
-    r = requests.delete("http://127.0.0.1:5000/books/"+id)
-    print("Delete status Code:" + str(r.status_code))
-    print(r.json()['message'])
+def remove_book(book_id: int) -> bool:
+    """Delete a book by ID."""
+    try:
+        response = requests.delete(f"{BASE_URL}/books/{book_id}", timeout=TIMEOUT)
+        print(f"DELETE status code: {response.status_code}")
 
-if __name__ == '__main__':
+        response.raise_for_status()
+        data = response.json()
+        print(f"Delete result: {data.get('message')}")
+        return True
 
-    print("***** Book information before update *****")
-    book = get_book('206')
+    except requests.exceptions.RequestException as e:
+        print(f"Error deleting book {book_id}: {e}")
+    except ValueError:
+        print("Failed to decode JSON response.")
+    return False
 
-    # update the book information
+
+if __name__ == "__main__":
+    book_id = 206
+
+    print("***** Book information before delete *****")
+    get_book(book_id)
+
     print("***** Deleting Book *****")
-    remove_book('206')
+    success = remove_book(book_id)
 
-    print("***** Book information after Delete *****")
-    book = get_book('206')
-
+    if success:
+        print("***** Book information after delete *****")
+        get_book(book_id)
