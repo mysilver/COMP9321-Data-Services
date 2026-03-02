@@ -1,43 +1,53 @@
 import pandas as pd
-from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.utils import shuffle
-from sklearn.metrics import precision_score, accuracy_score, recall_score
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, accuracy_score
 
 
-def load_iris(iris_path, split_percentage):
+def load_iris(iris_path: str, test_size: float = 0.3, random_state: int = 42):
+    """
+    Load the Iris dataset from CSV and split into training and test sets.
+
+    :param iris_path: Path to the CSV file containing Iris dataset
+    :param test_size: Fraction of the dataset to be used as test set
+    :param random_state: Seed for reproducibility
+    :return: X_train, X_test, y_train, y_test
+    """
+    # Load CSV data into a DataFrame
     df = pd.read_csv(iris_path)
 
-    df = shuffle(df)
-    iris_x = df.drop('species', axis=1).values
-    iris_y = df['species'].values
+    # Separate features and target labels
+    X = df.drop('species', axis=1).values  # Features
+    y = df['species'].values               # Labels
 
-    # Split iris data in train and test data
-    # A random permutation, to split the data randomly
-
-    split_point = int(len(iris_x) * split_percentage)
-    iris_X_train = iris_x[:split_point]
-    iris_y_train = iris_y[:split_point]
-    iris_X_test = iris_x[split_point:]
-    iris_y_test = iris_y[split_point:]
-
-    return iris_X_train, iris_y_train, iris_X_test, iris_y_test
+    # Split into training and test sets with random shuffling
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state, shuffle=True
+    )
+    return X_train, X_test, y_train, y_test
 
 
-if __name__ == '__main__':
+def main():
     csv_file = 'iris.csv'
 
-    # Split the data into test and train parts
-    iris_X_train, iris_y_train, iris_X_test, iris_y_test = load_iris(csv_file, split_percentage=0.7)
+    # Load data and split into training and test sets
+    X_train, X_test, y_train, y_test = load_iris(csv_file, test_size=0.3)
 
-    # train a classifier
-    knn = KNeighborsClassifier()
-    knn.fit(iris_X_train, iris_y_train)
+    # Initialize K-Nearest Neighbors classifier
+    knn = KNeighborsClassifier(n_neighbors=5)  # You can adjust n_neighbors
 
-    # predict the test set
-    predictions = knn.predict(iris_X_test)
+    # Train the classifier on the training set
+    knn.fit(X_train, y_train)
 
-    print("confusion_matrix:\n", confusion_matrix(iris_y_test, predictions))
-    print("precision:\t", precision_score(iris_y_test, predictions, average=None))
-    print("recall:\t\t", recall_score(iris_y_test, predictions, average=None))
-    print("accuracy:\t", accuracy_score(iris_y_test, predictions))
+    # Predict labels for the test set
+    predictions = knn.predict(X_test)
+
+    # Evaluate classifier performance
+    print("Confusion Matrix:\n", confusion_matrix(y_test, predictions))
+    print("Precision (per class):\t", precision_score(y_test, predictions, average=None))
+    print("Recall (per class):\t", recall_score(y_test, predictions, average=None))
+    print("Overall Accuracy:\t", accuracy_score(y_test, predictions))
+
+
+if __name__ == "__main__":
+    main()
